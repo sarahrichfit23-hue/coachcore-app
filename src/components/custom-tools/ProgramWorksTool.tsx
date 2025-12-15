@@ -150,7 +150,7 @@ export default class ProgramWorksTool {
           if (!file) return;
 
           const existingImg = imageContainer.querySelector(
-            ".program-works__image"
+            ".program-works__image",
           );
           if (existingImg) {
             existingImg.style.opacity = "0.5";
@@ -174,7 +174,7 @@ export default class ProgramWorksTool {
             } else {
               console.error("Upload failed:", result.error);
               alert(
-                "Failed to upload image: " + (result.error || "Unknown error")
+                "Failed to upload image: " + (result.error || "Unknown error"),
               );
               if (existingImg) {
                 existingImg.style.opacity = "1";
@@ -258,10 +258,10 @@ export default class ProgramWorksTool {
           mainTitleEl.querySelector("input").style.color = e.target.value;
         }
         const titles = this.wrapper.querySelectorAll(
-          ".program-works__card-title"
+          ".program-works__card-title",
         );
         const descs = this.wrapper.querySelectorAll(
-          ".program-works__card-desc"
+          ".program-works__card-desc",
         );
         titles.forEach((title) => {
           title.style.color = e.target.value;
@@ -285,7 +285,7 @@ export default class ProgramWorksTool {
       iconInput.addEventListener("input", (e) => {
         this.data.iconColor = e.target.value;
         const icons = this.wrapper.querySelectorAll(
-          ".program-works__icon circle"
+          ".program-works__icon circle",
         );
         icons.forEach((circle) => {
           circle.setAttribute("fill", e.target.value);
@@ -473,7 +473,7 @@ export default class ProgramWorksTool {
   renderImage(container, imageUrl) {
     const existingImage = container.querySelector(".program-works__image");
     const existingPlaceholder = container.querySelector(
-      ".program-works__placeholder"
+      ".program-works__placeholder",
     );
 
     if (existingImage) {

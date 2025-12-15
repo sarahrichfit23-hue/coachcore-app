@@ -115,7 +115,7 @@ export function AddClientDialog() {
   });
 
   const handleCreateClient = async (
-    event: React.FormEvent<HTMLFormElement>
+    event: React.FormEvent<HTMLFormElement>,
   ) => {
     event.preventDefault();
     setFormError("");
@@ -203,7 +203,7 @@ export function AddClientDialog() {
                     }
                     const clamped = Math.min(
                       20,
-                      Math.max(1, Math.floor(nextValue))
+                      Math.max(1, Math.floor(nextValue)),
                     );
                     setProgressPhases(clamped);
                   }}

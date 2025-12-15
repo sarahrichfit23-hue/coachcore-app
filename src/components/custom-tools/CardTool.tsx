@@ -12,7 +12,7 @@ interface CardData {
 interface CardToolConfig {
   uploader?: {
     uploadByFile?: (
-      file: File
+      file: File,
     ) => Promise<{ success: number; file: { url: string } }>;
   };
 }
@@ -286,7 +286,7 @@ export default class CardTool {
           this.data = newData;
         }}
         config={this.config}
-      />
+      />,
     );
 
     return this.wrapper;

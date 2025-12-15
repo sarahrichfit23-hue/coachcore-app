@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   if (!token) {
     return NextResponse.json(
       { success: false, error: "Unauthorized" },
-      { status: 401 }
+      { status: 401 },
     );
   }
 
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
   if (!payload) {
     return NextResponse.json(
       { success: false, error: "Unauthorized" },
-      { status: 401 }
+      { status: 401 },
     );
   }
 

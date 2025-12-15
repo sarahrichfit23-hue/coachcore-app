@@ -21,7 +21,7 @@ export const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME!;
 export async function uploadToR2(
   key: string,
   body: Buffer | Uint8Array,
-  contentType: string
+  contentType: string,
 ): Promise<string> {
   const command = new PutObjectCommand({
     Bucket: R2_BUCKET_NAME,
@@ -61,7 +61,7 @@ export function generateFileKey(
   userId: string,
   phaseNumber: number,
   photoIndex: number,
-  extension: string
+  extension: string,
 ): string {
   const timestamp = Date.now();
   return `progress/${userId}/phase-${phaseNumber}/photo-${photoIndex}-${timestamp}.${extension}`;

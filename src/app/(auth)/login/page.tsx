@@ -80,7 +80,7 @@ export default function LoginPage() {
       setError(
         err instanceof Error
           ? err.message
-          : "Unable to sign in. Please try again."
+          : "Unable to sign in. Please try again.",
       );
     },
   });

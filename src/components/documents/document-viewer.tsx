@@ -16,12 +16,12 @@ export function DocumentViewer({ document }: DocumentViewerProps) {
 
   const visiblePageIds = useMemo(() => {
     return document.sections.flatMap((section) =>
-      section.pages.filter((page) => !page.hidden).map((page) => page.id)
+      section.pages.filter((page) => !page.hidden).map((page) => page.id),
     );
   }, [document.sections]);
 
   const [selectedPageId, setSelectedPageId] = useState<string | null>(
-    () => visiblePageIds[0] ?? null
+    () => visiblePageIds[0] ?? null,
   );
 
   const selected = useMemo(() => {

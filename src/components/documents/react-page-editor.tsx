@@ -46,7 +46,7 @@ export function ReactPageEditor({
 }: ReactPageEditorProps) {
   const holderRef = useRef<HTMLDivElement | null>(null);
   const holderKeyRef = useRef<string>(
-    `editorjs-${Math.random().toString(36).slice(2)}`
+    `editorjs-${Math.random().toString(36).slice(2)}`,
   );
   const editorRef = useRef<EditorJS | null>(null);
   const lastSavedRef = useRef<unknown>(null);

@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     if (!session) {
       return NextResponse.json(
         { success: false, error: "Invalid token" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -40,21 +40,21 @@ export async function POST(request: NextRequest) {
     if (!receiverId || typeof receiverId !== "string") {
       return NextResponse.json(
         { success: false, error: "Invalid receiverId" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!content || typeof content !== "string") {
       return NextResponse.json(
         { success: false, error: "Invalid content" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (content.trim().length === 0) {
       return NextResponse.json(
         { success: false, error: "Message content cannot be empty" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     if (!receiver || !receiver.isActive) {
       return NextResponse.json(
         { success: false, error: "Receiver not found or inactive" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     if (session.userId === receiverId) {
       return NextResponse.json(
         { success: false, error: "Cannot send message to yourself" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
     if (!sender) {
       return NextResponse.json(
         { success: false, error: "Sender not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
             success: false,
             error: "Clients can only message their coach",
           },
-          { status: 403 }
+          { status: 403 },
         );
       }
       // Verify the receiver is the client's coach (clientProfile.coachId points to CoachProfile)
@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
             success: false,
             error: "This is not your coach",
           },
-          { status: 403 }
+          { status: 403 },
         );
       }
     }
@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
               success: false,
               error: "Coach profile not found",
             },
-            { status: 403 }
+            { status: 403 },
           );
         }
 
@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
               success: false,
               error: "This client is not under your management",
             },
-            { status: 403 }
+            { status: 403 },
           );
         }
       } else if (receiver.role !== "ADMIN") {
@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
             success: false,
             error: "Coaches can only message clients or admin",
           },
-          { status: 403 }
+          { status: 403 },
         );
       }
     }
@@ -176,7 +176,7 @@ export async function POST(request: NextRequest) {
     else if (sender.role !== "ADMIN") {
       return NextResponse.json(
         { success: false, error: "Invalid sender role" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -212,13 +212,13 @@ export async function POST(request: NextRequest) {
         success: true,
         data: message,
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Error sending message:", error);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

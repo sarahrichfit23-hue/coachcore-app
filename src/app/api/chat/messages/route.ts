@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     if (!session) {
       return NextResponse.json(
         { success: false, error: "Invalid token" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     const otherUserId = searchParams.get("userId");
     const limit = Math.min(
       parseInt(searchParams.get("limit") || "15", 10),
-      100
+      100,
     );
     const offset = Math.max(parseInt(searchParams.get("offset") || "0", 10), 0);
 
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
     if (!otherUserId || typeof otherUserId !== "string") {
       return NextResponse.json(
         { success: false, error: "Invalid userId parameter" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
     if (!otherUser || !otherUser.isActive) {
       return NextResponse.json(
         { success: false, error: "User not found or inactive" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -87,7 +87,7 @@ export async function GET(request: NextRequest) {
     if (!sender) {
       return NextResponse.json(
         { success: false, error: "Sender not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
             success: false,
             error: "Clients can only fetch messages from their coach",
           },
-          { status: 403 }
+          { status: 403 },
         );
       }
       const coachUserId = sender.clientProfile?.coach?.userId;
@@ -109,7 +109,7 @@ export async function GET(request: NextRequest) {
             success: false,
             error: "This is not your coach",
           },
-          { status: 403 }
+          { status: 403 },
         );
       }
     } else if (sender.role === "COACH") {
@@ -121,7 +121,7 @@ export async function GET(request: NextRequest) {
               success: false,
               error: "Coach profile not found",
             },
-            { status: 403 }
+            { status: 403 },
           );
         }
 
@@ -138,7 +138,7 @@ export async function GET(request: NextRequest) {
               success: false,
               error: "This client is not under your management",
             },
-            { status: 403 }
+            { status: 403 },
           );
         }
       } else if (otherUser.role !== "ADMIN") {
@@ -147,13 +147,13 @@ export async function GET(request: NextRequest) {
             success: false,
             error: "Coaches can only fetch messages from clients or admin",
           },
-          { status: 403 }
+          { status: 403 },
         );
       }
     } else if (sender.role !== "ADMIN") {
       return NextResponse.json(
         { success: false, error: "Invalid sender role" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -218,13 +218,13 @@ export async function GET(request: NextRequest) {
           total: messages.length,
         },
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Error fetching messages:", error);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

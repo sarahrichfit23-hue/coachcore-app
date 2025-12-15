@@ -85,7 +85,7 @@ export default class ProfileCardTool {
 
         // Show loading state
         const existingImg = imageContainer.querySelector(
-          ".profile-card__image"
+          ".profile-card__image",
         );
         if (existingImg) {
           existingImg.style.opacity = "0.5";
@@ -111,7 +111,7 @@ export default class ProfileCardTool {
           } else {
             console.error("Upload failed:", result.error);
             alert(
-              "Failed to upload image: " + (result.error || "Unknown error")
+              "Failed to upload image: " + (result.error || "Unknown error"),
             );
             if (existingImg) {
               existingImg.style.opacity = "1";
@@ -448,7 +448,7 @@ export default class ProfileCardTool {
   renderImage(container) {
     const existingImage = container.querySelector(".profile-card__image");
     const existingPlaceholder = container.querySelector(
-      ".profile-card__placeholder"
+      ".profile-card__placeholder",
     );
 
     if (existingImage) {

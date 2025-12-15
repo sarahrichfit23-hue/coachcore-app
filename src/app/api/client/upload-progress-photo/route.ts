@@ -29,14 +29,14 @@ export async function POST(request: NextRequest) {
     if (!session) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     if (session.role !== "CLIENT") {
       return NextResponse.json(
         { success: false, error: "Forbidden" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     if (!phaseId || typeof phaseId !== "string") {
       return NextResponse.json(
         { success: false, error: "phaseId is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -58,21 +58,21 @@ export async function POST(request: NextRequest) {
     if (!file) {
       return NextResponse.json(
         { success: false, error: "File is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json(
         { success: false, error: "Only JPEG, PNG, or WEBP images are allowed" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (file.size > MAX_SIZE_BYTES) {
       return NextResponse.json(
         { success: false, error: "File size exceeds 5MB limit" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -91,14 +91,14 @@ export async function POST(request: NextRequest) {
     if (!progress) {
       return NextResponse.json(
         { success: false, error: "Progress phase not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     if (progress.clientProfile.userId !== session.userId) {
       return NextResponse.json(
         { success: false, error: "Forbidden" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
       session.userId,
       progress.phaseNumber,
       slot,
-      extension
+      extension,
     );
 
     const buffer = Buffer.from(await file.arrayBuffer());
@@ -138,13 +138,13 @@ export async function POST(request: NextRequest) {
           view,
         },
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Upload progress photo error", error);
     return NextResponse.json(
       { success: false, error: "Unable to upload photo" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -188,7 +188,7 @@ export default class IntakeFormTool {
     const badge = document.createElement("div");
     badge.classList.add("component-badge");
     const componentName = this.availableComponents.find(
-      (c) => c.id === this.data.componentType
+      (c) => c.id === this.data.componentType,
     )?.name;
     badge.textContent = `Selected: ${componentName || "Component"}`;
     badge.style.marginBottom = "12px";
@@ -222,7 +222,7 @@ export default class IntakeFormTool {
     const badge = document.createElement("div");
     badge.classList.add("component-badge");
     const componentName = this.availableComponents.find(
-      (c) => c.id === this.data.componentType
+      (c) => c.id === this.data.componentType,
     )?.name;
     badge.textContent = componentName || "Interactive Component";
     container.appendChild(badge);

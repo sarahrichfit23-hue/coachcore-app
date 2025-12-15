@@ -151,13 +151,13 @@ async function fetchCoachStats(): Promise<CoachStat[]> {
 }
 
 async function fetchClientProgress(
-  clientId: string
+  clientId: string,
 ): Promise<ClientProgressResponse> {
   const response = await fetch(
     `/api/coach/client-progress?clientId=${clientId}`,
     {
       credentials: "include",
-    }
+    },
   );
 
   const payload = (await response.json()) as {
@@ -225,7 +225,7 @@ export default function CoachDashboardPage() {
     mutationFn: (clientId: string) => deleteClient(clientId),
     onSuccess: (_data, clientId) => {
       queryClient.setQueryData<Client[]>(coachClientsQueryKey, (previous) =>
-        (previous ?? []).filter((client) => client.id !== clientId)
+        (previous ?? []).filter((client) => client.id !== clientId),
       );
       void queryClient.invalidateQueries({ queryKey: coachClientsQueryKey });
       void queryClient.invalidateQueries({ queryKey: coachStatsQueryKey });

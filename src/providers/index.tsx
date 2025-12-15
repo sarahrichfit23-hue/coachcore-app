@@ -3,7 +3,7 @@
 import { QueryProvider } from "./query-provider";
 import { ToastProvider } from "./toast-provider";
 import { SessionProvider } from "./session-provider";
-import { NProgressProvider } from "./nprogress-provider";
+import NProgressProvider from "./nprogress-provider";
 import { type ReactNode } from "react";
 
 interface ProvidersProps {

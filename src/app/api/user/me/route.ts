@@ -47,7 +47,7 @@ export async function GET() {
     if (!session) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -56,7 +56,7 @@ export async function GET() {
     if (!user || !user.isActive) {
       return NextResponse.json(
         { success: false, error: "User not found or inactive" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -65,13 +65,13 @@ export async function GET() {
         success: true,
         data: user,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Error fetching user:", error);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -90,7 +90,7 @@ export async function PATCH(request: NextRequest) {
     if (!session) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -113,7 +113,7 @@ export async function PATCH(request: NextRequest) {
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json(
         { success: false, error: "No fields to update" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -134,13 +134,13 @@ export async function PATCH(request: NextRequest) {
         success: true,
         data: user,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Error updating user:", error);
     return NextResponse.json(
       { success: false, error: "Failed to update user" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

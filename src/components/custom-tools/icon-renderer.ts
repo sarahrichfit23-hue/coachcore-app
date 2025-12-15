@@ -19,10 +19,17 @@ export function createIconElement({
   iconName = "info",
   color = "#1f2937",
   readOnly = false,
-  onChange = null,
+  onChange,
   size = 20,
   strokeWidth = 2,
-}) {
+}: {
+  iconName?: any;
+  color?: any;
+  readOnly?: boolean;
+  onChange?: (newIconName: any) => void;
+  size?: any;
+  strokeWidth?: any;
+}): HTMLElement {
   const iconEl = document.createElement("div");
   iconEl.classList.add("editorjs-icon-container");
 
@@ -36,7 +43,7 @@ export function createIconElement({
             size: size,
             strokeWidth: strokeWidth,
             color: color,
-          })
+          }),
         );
         iconEl.innerHTML = iconSvg;
       } catch (err) {
@@ -66,7 +73,7 @@ export function createIconElement({
               size: 20,
               strokeWidth: 2,
               color: color,
-            })
+            }),
           );
           iconEl.insertAdjacentHTML("afterbegin", iconSvg);
         } catch (err) {
@@ -81,7 +88,10 @@ export function createIconElement({
     };
 
     iconInput.addEventListener("input", (e) => {
-      updateIcon(e.target.value);
+      const target = e.target as HTMLInputElement;
+      if (target?.value !== undefined) {
+        updateIcon(target.value);
+      }
     });
 
     iconInput.addEventListener("keydown", (e) => {
@@ -112,7 +122,7 @@ export function createIconElement({
 export function updateIconColor(
   iconEl: HTMLElement,
   newColor: string,
-  iconName: string
+  iconName: string,
 ) {
   const iconSvg = iconEl.querySelector("svg");
   if (iconSvg) {
@@ -132,7 +142,7 @@ export function updateIconColor(
             size: 20,
             strokeWidth: 2,
             color: newColor,
-          })
+          }),
         );
         iconEl.insertAdjacentHTML("afterbegin", iconSvg);
       } catch (err) {

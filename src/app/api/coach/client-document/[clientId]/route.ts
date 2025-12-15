@@ -22,7 +22,7 @@ function ensureDocumentContent(value: unknown): DocumentContent {
 
 async function getAuthorizedClientDocument(
   clientId: string,
-  coachUserId: string
+  coachUserId: string,
 ) {
   const coachProfile = await prisma.coachProfile.findUnique({
     where: { userId: coachUserId },
@@ -43,7 +43,7 @@ async function getAuthorizedClientDocument(
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: Promise<{ clientId: string }> }
+  { params }: { params: Promise<{ clientId: string }> },
 ) {
   try {
     const { clientId } = await params;
@@ -51,7 +51,7 @@ export async function GET(
     if (!token) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -59,7 +59,7 @@ export async function GET(
     if (!session || session.role !== "COACH") {
       return NextResponse.json(
         { success: false, error: "Forbidden" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -68,7 +68,7 @@ export async function GET(
     if (!client) {
       return NextResponse.json(
         { success: false, error: "Client not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -77,7 +77,7 @@ export async function GET(
     if (!document) {
       return NextResponse.json(
         { success: false, error: "Document not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -96,14 +96,14 @@ export async function GET(
     console.error("Coach get client document error", error);
     return NextResponse.json(
       { success: false, error: "Unable to fetch document" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ clientId: string }> }
+  { params }: { params: Promise<{ clientId: string }> },
 ) {
   try {
     const { clientId } = await params;
@@ -111,7 +111,7 @@ export async function PATCH(
     if (!token) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -119,7 +119,7 @@ export async function PATCH(
     if (!session || session.role !== "COACH") {
       return NextResponse.json(
         { success: false, error: "Forbidden" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -130,7 +130,7 @@ export async function PATCH(
     if (!pageId || typeof hidden !== "boolean") {
       return NextResponse.json(
         { success: false, error: "pageId and hidden are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -139,7 +139,7 @@ export async function PATCH(
     if (!client) {
       return NextResponse.json(
         { success: false, error: "Client not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -147,7 +147,7 @@ export async function PATCH(
     if (!document) {
       return NextResponse.json(
         { success: false, error: "Document not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -155,7 +155,7 @@ export async function PATCH(
     if (!updated) {
       return NextResponse.json(
         { success: false, error: "Page not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -172,14 +172,14 @@ export async function PATCH(
     console.error("Coach update page hidden error", error);
     return NextResponse.json(
       { success: false, error: "Unable to update page" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ clientId: string }> }
+  { params }: { params: Promise<{ clientId: string }> },
 ) {
   try {
     const { clientId } = await params;
@@ -187,7 +187,7 @@ export async function PUT(
     if (!token) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -195,7 +195,7 @@ export async function PUT(
     if (!session || session.role !== "COACH") {
       return NextResponse.json(
         { success: false, error: "Forbidden" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -206,7 +206,7 @@ export async function PUT(
     if (!pageId) {
       return NextResponse.json(
         { success: false, error: "pageId is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -215,7 +215,7 @@ export async function PUT(
     if (!client) {
       return NextResponse.json(
         { success: false, error: "Client not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -223,7 +223,7 @@ export async function PUT(
     if (!document) {
       return NextResponse.json(
         { success: false, error: "Document not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -231,7 +231,7 @@ export async function PUT(
     if (!updated) {
       return NextResponse.json(
         { success: false, error: "Page not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -253,7 +253,7 @@ export async function PUT(
     console.error("Coach save page error", error);
     return NextResponse.json(
       { success: false, error: "Unable to save page" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

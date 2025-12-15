@@ -23,7 +23,7 @@ function getSecretKey(): Uint8Array {
 }
 
 export async function signAuthToken(
-  payload: AuthTokenPayload
+  payload: AuthTokenPayload,
 ): Promise<string> {
   const secret = getSecretKey();
   return new SignJWT(payload)
@@ -34,7 +34,7 @@ export async function signAuthToken(
 }
 
 export async function verifyAuthToken(
-  token: string
+  token: string,
 ): Promise<AuthTokenPayload | null> {
   try {
     const secret = getSecretKey();

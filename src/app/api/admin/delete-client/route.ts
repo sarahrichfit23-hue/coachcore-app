@@ -8,7 +8,7 @@ export async function DELETE(request: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -16,14 +16,14 @@ export async function DELETE(request: NextRequest) {
     if (!session) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     if (session.role !== "ADMIN") {
       return NextResponse.json(
         { success: false, error: "Forbidden" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -32,7 +32,7 @@ export async function DELETE(request: NextRequest) {
     if (!clientId) {
       return NextResponse.json(
         { success: false, error: "clientId is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -47,7 +47,7 @@ export async function DELETE(request: NextRequest) {
     if (!clientProfile) {
       return NextResponse.json(
         { success: false, error: "Client not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -66,7 +66,7 @@ export async function DELETE(request: NextRequest) {
       },
       {
         timeout: 15000,
-      }
+      },
     );
 
     return NextResponse.json({ success: true });
@@ -74,7 +74,7 @@ export async function DELETE(request: NextRequest) {
     console.error("Admin delete client error", error);
     return NextResponse.json(
       { success: false, error: "Unable to delete client" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

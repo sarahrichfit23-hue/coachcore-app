@@ -32,7 +32,7 @@ export async function middleware(request: NextRequest) {
   if (pathname === LOGIN_PATH) {
     if (session) {
       return NextResponse.redirect(
-        new URL(getDashboardPath(session.role), request.url)
+        new URL(getDashboardPath(session.role), request.url),
       );
     }
     return NextResponse.next();

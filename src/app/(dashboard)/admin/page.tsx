@@ -138,7 +138,7 @@ export default function AdminDashboardPage() {
   const queryClient = useQueryClient();
 
   const [coachDeleteTarget, setCoachDeleteTarget] = useState<AdminCoach | null>(
-    null
+    null,
   );
   const [clientDeleteTarget, setClientDeleteTarget] =
     useState<AdminClient | null>(null);

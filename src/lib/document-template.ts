@@ -98,7 +98,7 @@ function cloneContent(json: DocumentContent): DocumentContent {
 }
 
 function createSectionWithIds(
-  section: (typeof baseTemplateSections)[number]
+  section: (typeof baseTemplateSections)[number],
 ): DocumentSection {
   return {
     id: uuidv4(),
@@ -119,7 +119,7 @@ export function createDocumentTemplateWithIds(): DocumentTemplate {
 }
 
 export function cloneTemplateWithNewPageIds(
-  template: DocumentTemplate
+  template: DocumentTemplate,
 ): DocumentTemplate {
   return {
     sections: template.sections.map((section) => ({
@@ -139,7 +139,7 @@ export const DEFAULT_DOCUMENT_TEMPLATE: DocumentTemplate =
 export function updatePageHidden(
   template: DocumentTemplate,
   pageId: string,
-  hidden: boolean
+  hidden: boolean,
 ): DocumentTemplate | null {
   const cloned = structuredClone(template);
   for (const section of cloned.sections) {
@@ -155,7 +155,7 @@ export function updatePageHidden(
 export function updatePageJson(
   template: DocumentTemplate,
   pageId: string,
-  json: DocumentContent
+  json: DocumentContent,
 ): DocumentTemplate | null {
   const cloned = structuredClone(template);
   for (const section of cloned.sections) {
@@ -170,7 +170,7 @@ export function updatePageJson(
 
 export function findPageById(
   template: DocumentTemplate,
-  pageId: string
+  pageId: string,
 ): { page: DocumentPage; sectionName: string } | null {
   for (const section of template.sections) {
     const page = section.pages.find((p) => p.id === pageId);

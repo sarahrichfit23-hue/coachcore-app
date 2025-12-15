@@ -420,7 +420,7 @@ export default class PeriodSummaryCardTool {
           this.data.goals.splice(index, 1);
           // Remove old section and re-render
           const oldSection = container.querySelector(
-            ".period-summary-two-column"
+            ".period-summary-two-column",
           );
           if (oldSection) {
             container.removeChild(oldSection);
@@ -441,7 +441,7 @@ export default class PeriodSummaryCardTool {
         this.data.goals.push({ label: "", value: "" });
         // Remove old section and re-render
         const oldSection = container.querySelector(
-          ".period-summary-two-column"
+          ".period-summary-two-column",
         );
         if (oldSection) {
           container.removeChild(oldSection);

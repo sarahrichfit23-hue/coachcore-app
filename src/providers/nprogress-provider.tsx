@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import NProgress from "nprogress";
 import "nprogress/nprogress.css";
@@ -11,7 +11,7 @@ NProgress.configure({
   minimum: 0.1,
 });
 
-export function NProgressProvider({ children }: { children: React.ReactNode }) {
+function NProgressProviderContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -61,4 +61,22 @@ export function NProgressProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return <>{children}</>;
+}
+
+export default function NProgressProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex h-full items-center justify-center">
+          Loading messages...
+        </div>
+      }
+    >
+      <NProgressProviderContent>{children}</NProgressProviderContent>
+    </Suspense>
+  );
 }

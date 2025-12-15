@@ -9,14 +9,14 @@ export async function GET() {
     if (!session) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     if (session.role !== "CLIENT") {
       return NextResponse.json(
         { success: false, error: "Forbidden" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -28,7 +28,7 @@ export async function GET() {
     if (!clientProfile) {
       return NextResponse.json(
         { success: false, error: "Client profile not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -82,13 +82,13 @@ export async function GET() {
           phases,
         },
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Client get progress error", error);
     return NextResponse.json(
       { success: false, error: "Unable to fetch progress" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

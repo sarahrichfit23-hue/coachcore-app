@@ -9,14 +9,14 @@ export async function POST(request: NextRequest) {
     if (!session) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     if (session.role !== "CLIENT") {
       return NextResponse.json(
         { success: false, error: "Forbidden" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     if (!phaseId) {
       return NextResponse.json(
         { success: false, error: "phaseId is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -44,21 +44,21 @@ export async function POST(request: NextRequest) {
     if (!phase) {
       return NextResponse.json(
         { success: false, error: "Progress phase not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     if (phase.clientProfile.userId !== session.userId) {
       return NextResponse.json(
         { success: false, error: "Forbidden" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
     if (!phase.photo1Url || !phase.photo2Url || !phase.photo3Url) {
       return NextResponse.json(
         { success: false, error: "Upload all photos before saving" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -89,13 +89,13 @@ export async function POST(request: NextRequest) {
           updatedAt: updated.updatedAt,
         },
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Complete progress error", error);
     return NextResponse.json(
       { success: false, error: "Unable to save progress" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

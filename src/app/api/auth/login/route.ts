@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     if (!email || !password) {
       return NextResponse.json(
         { success: false, error: "Email and password are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     if (!user || !user.isActive) {
       return NextResponse.json(
         { success: false, error: "Invalid credentials" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     if (!validPassword) {
       return NextResponse.json(
         { success: false, error: "Invalid credentials" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     if (!role) {
       return NextResponse.json(
         { success: false, error: "User role is not supported" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
     console.error("Login failed", error);
     return NextResponse.json(
       { success: false, error: "Unable to login" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

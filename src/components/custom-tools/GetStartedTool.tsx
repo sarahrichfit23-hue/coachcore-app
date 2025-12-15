@@ -113,7 +113,7 @@ export default class GetStartedTool {
           } else {
             console.error("Upload failed:", result.error);
             alert(
-              "Failed to upload image: " + (result.error || "Unknown error")
+              "Failed to upload image: " + (result.error || "Unknown error"),
             );
             if (existingImg) {
               existingImg.style.opacity = "1";
@@ -616,7 +616,7 @@ export default class GetStartedTool {
   renderImage(container) {
     const existingImage = container.querySelector(".get-started__image");
     const existingPlaceholder = container.querySelector(
-      ".get-started__placeholder"
+      ".get-started__placeholder",
     );
 
     if (existingImage) {

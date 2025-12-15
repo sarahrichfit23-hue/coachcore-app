@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -16,14 +16,14 @@ export async function GET(request: NextRequest) {
     if (!session) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     if (session.role !== "ADMIN") {
       return NextResponse.json(
         { success: false, error: "Forbidden" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
 
     const payload = coaches.map((coach) => {
       const activeClients = (coach.coachProfile?.clients ?? []).filter(
-        (client) => client.user?.isActive
+        (client) => client.user?.isActive,
       );
 
       return {
@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
     console.error("Admin fetch coaches error", error);
     return NextResponse.json(
       { success: false, error: "Unable to load coaches" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

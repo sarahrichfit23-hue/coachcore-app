@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -28,14 +28,14 @@ export async function POST(request: NextRequest) {
     if (!session) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     if (session.role !== "COACH") {
       return NextResponse.json(
         { success: false, error: "Forbidden" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     if (!name || !email || !isValidEmail(email)) {
       return NextResponse.json(
         { success: false, error: "Name and valid email are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
           success: false,
           error: "Progress phases must be an integer between 1 and 20",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     if (existingUser) {
       return NextResponse.json(
         { success: false, error: "User with this email already exists" },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     if (!coachProfile) {
       return NextResponse.json(
         { success: false, error: "Coach profile not found" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
     // }
 
     const clientDocument = cloneTemplateWithNewPageIds(
-      DEFAULT_DOCUMENT_TEMPLATE
+      DEFAULT_DOCUMENT_TEMPLATE,
     );
 
     const rawPassword = generateSystemPassword();
@@ -131,21 +131,21 @@ export async function POST(request: NextRequest) {
           (_, index) => ({
             clientProfileId: createdClientProfile.id,
             phaseNumber: index + 1,
-          })
+          }),
         );
 
         await tx.progress.createMany({ data: progressRows });
       },
       {
         timeout: 15000,
-      }
+      },
     );
 
     const emailConfig = getEmailConfig();
     if (!emailConfig.success) {
       return NextResponse.json(
         { success: false, error: emailConfig.error },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -161,7 +161,7 @@ export async function POST(request: NextRequest) {
     if (!compiledTemplate.success) {
       return NextResponse.json(
         { success: false, error: compiledTemplate.error },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -175,19 +175,19 @@ export async function POST(request: NextRequest) {
     if (!emailResult.success) {
       return NextResponse.json(
         { success: false, error: emailResult.error },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     return NextResponse.json(
       { success: true, message: "Credentials sent to email" },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Coach create client error", error);
     return NextResponse.json(
       { success: false, error: "Unable to create client" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

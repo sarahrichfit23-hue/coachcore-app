@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     if (!session) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     if (!file) {
       return NextResponse.json(
         { success: false, error: "No file provided" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
           success: false,
           error: "Invalid file type. Only JPG, PNG, and GIF are allowed",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     if (file.size > maxSize) {
       return NextResponse.json(
         { success: false, error: "File size exceeds 2MB limit" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -67,13 +67,13 @@ export async function POST(request: NextRequest) {
         url,
         filename,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Error uploading avatar:", error);
     return NextResponse.json(
       { success: false, error: "Failed to upload avatar" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

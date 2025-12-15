@@ -39,7 +39,7 @@ const fetchMessages = async ({
     `/api/chat/messages?userId=${userId}&limit=${limit}&offset=${pageParam}`,
     {
       credentials: "include",
-    }
+    },
   );
   if (!response.ok) throw new Error("Failed to fetch messages");
   const data = await response.json();
@@ -120,10 +120,10 @@ function MessagesPageContent() {
             pages: old.pages.map((page: any, index: number) =>
               index === 0
                 ? { ...page, messages: [newMessage, ...page.messages] }
-                : page
+                : page,
             ),
           };
-        }
+        },
       );
       setMessageText("");
     },
@@ -155,7 +155,7 @@ function MessagesPageContent() {
     }
 
     const stillExists = contacts.some(
-      (contact) => contact.id === selectedContact.id
+      (contact) => contact.id === selectedContact.id,
     );
 
     if (!stillExists) {
@@ -272,7 +272,7 @@ function MessagesPageContent() {
                         {contact.lastMessage && (
                           <span className="text-xs text-gray-500">
                             {new Date(
-                              contact.lastMessage.sentAt
+                              contact.lastMessage.sentAt,
                             ).toLocaleTimeString([], {
                               hour: "2-digit",
                               minute: "2-digit",
@@ -387,7 +387,7 @@ function MessagesPageContent() {
                                   {
                                     hour: "2-digit",
                                     minute: "2-digit",
-                                  }
+                                  },
                                 )}
                               </span>
                             </div>

@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     if (!session) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -39,14 +39,14 @@ export async function POST(request: NextRequest) {
     if (!newPassword || !confirmPassword) {
       return NextResponse.json(
         { success: false, error: "New password and confirmation are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (newPassword !== confirmPassword) {
       return NextResponse.json(
         { success: false, error: "Passwords do not match" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     if (passwordError) {
       return NextResponse.json(
         { success: false, error: passwordError },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
     if (!user || !user.isActive) {
       return NextResponse.json(
         { success: false, error: "User not found or inactive" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
           isPasswordChanged: updatedUser.isPasswordChanged,
         },
       },
-      { status: 200 }
+      { status: 200 },
     );
 
     response.cookies.set(buildAuthCookie(token));
@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
     console.error("Reset password error", error);
     return NextResponse.json(
       { success: false, error: "Unable to reset password" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     if (!session) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
           success: false,
           error: "Full name and date of birth are required",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     if (!clientProfile) {
       return NextResponse.json(
         { success: false, error: "Client profile not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
     for (let i = 0; i < document.sections?.length; i++) {
       const section = document.sections[i];
       const foundPageIndex = section.pages?.findIndex(
-        (page: any) => page.title?.toLowerCase() === "intake questionnaire"
+        (page: any) => page.title?.toLowerCase() === "intake questionnaire",
       );
 
       if (foundPageIndex !== -1) {
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
           success: false,
           error: "Intake Questionnaire page not found in document structure",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
 
     // Find the IntakeForm block
     const intakeFormBlockIndex = intakePage.json.blocks.findIndex(
-      (block: any) => block.type === "IntakeForm"
+      (block: any) => block.type === "IntakeForm",
     );
 
     if (intakeFormBlockIndex === -1) {
@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
           success: false,
           error: "IntakeForm block not found in the page",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -192,7 +192,7 @@ export async function POST(request: NextRequest) {
         success: false,
         error: "Failed to submit intake form. Please try again.",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -210,7 +210,7 @@ export async function GET(request: NextRequest) {
     if (!session) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -223,7 +223,7 @@ export async function GET(request: NextRequest) {
     if (!clientProfile) {
       return NextResponse.json(
         { success: false, error: "Client profile not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -235,12 +235,12 @@ export async function GET(request: NextRequest) {
 
     for (const section of document.sections || []) {
       const intakePage = section.pages?.find(
-        (page: any) => page.title?.toLowerCase() === "intake questionnaire"
+        (page: any) => page.title?.toLowerCase() === "intake questionnaire",
       );
 
       if (intakePage?.json?.blocks) {
         intakeFormBlock = intakePage.json.blocks.find(
-          (block: any) => block.type === "IntakeForm"
+          (block: any) => block.type === "IntakeForm",
         );
         if (intakeFormBlock) break;
       }
@@ -265,7 +265,7 @@ export async function GET(request: NextRequest) {
         success: false,
         error: "Failed to retrieve intake form data",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -84,7 +84,7 @@ export default function SettingsPage() {
       toast.error(
         error instanceof Error
           ? error.message
-          : "Failed to upload avatar. Please try again."
+          : "Failed to upload avatar. Please try again.",
       );
     } finally {
       setUploadingAvatar(false);
@@ -106,7 +106,7 @@ export default function SettingsPage() {
       toast.error(
         error instanceof Error
           ? error.message
-          : "Failed to update profile. Please try again."
+          : "Failed to update profile. Please try again.",
       );
     }
   };

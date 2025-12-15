@@ -122,13 +122,13 @@ export default class FAQTool {
           header.querySelector("input").style.color = e.target.value;
         }
         const questionTexts = this.wrapper.querySelectorAll(
-          ".faq-item__question-text, .faq-item__question input"
+          ".faq-item__question-text, .faq-item__question input",
         );
         questionTexts.forEach((t) => {
           t.style.color = e.target.value;
         });
         const answerTexts = this.wrapper.querySelectorAll(
-          ".faq-item__answer-text, .faq-item__answer textarea"
+          ".faq-item__answer-text, .faq-item__answer textarea",
         );
         answerTexts.forEach((t) => {
           t.style.color = e.target.value;

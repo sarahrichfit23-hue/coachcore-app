@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -16,14 +16,14 @@ export async function GET(request: NextRequest) {
     if (!session) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     if (session.role !== "COACH") {
       return NextResponse.json(
         { success: false, error: "Forbidden" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     if (!coachProfile) {
       return NextResponse.json(
         { success: false, error: "Coach profile not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
     console.error("Coach stats error", error);
     return NextResponse.json(
       { success: false, error: "Unable to load stats" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

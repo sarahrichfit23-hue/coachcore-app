@@ -14,7 +14,7 @@ export type OnboardingTemplateParams = {
 
 const templatePath = path.join(
   process.cwd(),
-  "src/lib/email/templates/onboarding.html"
+  "src/lib/email/templates/onboarding.html",
 );
 
 let cachedTemplate: string | null = null;
@@ -34,7 +34,7 @@ async function loadTemplate(): Promise<Result<string>> {
 
 function applyPlaceholders(
   template: string,
-  placeholders: Record<string, string>
+  placeholders: Record<string, string>,
 ): string {
   let html = template;
   for (const [key, value] of Object.entries(placeholders)) {
@@ -45,7 +45,7 @@ function applyPlaceholders(
 }
 
 export async function renderOnboardingTemplate(
-  params: OnboardingTemplateParams
+  params: OnboardingTemplateParams,
 ): Promise<Result<string>> {
   const template = await loadTemplate();
   if (!template.success) return template;

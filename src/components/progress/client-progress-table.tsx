@@ -72,7 +72,7 @@ async function fetchClientProgress(): Promise<{
 async function uploadProgressPhoto(
   phaseId: string,
   view: "front" | "side" | "back",
-  file: File
+  file: File,
 ): Promise<ProgressPhase> {
   const formData = new FormData();
   formData.append("phaseId", phaseId);
@@ -200,7 +200,7 @@ export function ClientProgressTable() {
       }>(clientProgressQueryKey, (previous) => {
         if (!previous) return previous;
         const nextPhases = previous.phases.map((phase) =>
-          phase.id === updatedPhase.id ? updatedPhase : phase
+          phase.id === updatedPhase.id ? updatedPhase : phase,
         );
         return { ...previous, phases: nextPhases };
       });
@@ -213,7 +213,7 @@ export function ClientProgressTable() {
     onError: (error) => {
       setActiveUploadKey(null);
       toast.error(
-        error instanceof Error ? error.message : "Unable to upload photo"
+        error instanceof Error ? error.message : "Unable to upload photo",
       );
     },
   });
@@ -227,7 +227,7 @@ export function ClientProgressTable() {
       }>(clientProgressQueryKey, (previous) => {
         if (!previous) return previous;
         const nextPhases = previous.phases.map((phase) =>
-          phase.id === updatedPhase.id ? updatedPhase : phase
+          phase.id === updatedPhase.id ? updatedPhase : phase,
         );
         return { ...previous, phases: nextPhases };
       });
@@ -236,7 +236,7 @@ export function ClientProgressTable() {
     },
     onError: (error) => {
       toast.error(
-        error instanceof Error ? error.message : "Unable to save progress"
+        error instanceof Error ? error.message : "Unable to save progress",
       );
     },
   });
@@ -244,7 +244,7 @@ export function ClientProgressTable() {
   const handleUpload = async (
     phaseId: string,
     view: "front" | "side" | "back",
-    file: File
+    file: File,
   ) => {
     const key = `${phaseId}-${view}`;
     setActiveUploadKey(key);
