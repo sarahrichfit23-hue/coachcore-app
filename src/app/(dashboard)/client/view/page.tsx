@@ -1,3 +1,5 @@
+export const runtime = "nodejs";
+
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth/token";

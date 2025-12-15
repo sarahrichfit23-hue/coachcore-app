@@ -6,8 +6,6 @@ import DashboardShell, {
 import { CoachCoreLoader } from "@/components/ui/loader";
 import { type AppRole } from "@/lib/auth/token";
 import { useSession } from "@/providers";
-import { Loader2 } from "lucide-react";
-import Image from "next/image";
 
 function getDashboardHref(role?: AppRole): string {
   switch (role) {
