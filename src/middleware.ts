@@ -1,0 +1,91 @@
+import { NextResponse, type NextRequest } from "next/server";
+import { verifyAuthToken, type AppRole } from "@/lib/auth/token";
+
+const PROTECTED_PREFIXES = ["/admin", "/coach", "/client"] as const;
+const LOGIN_PATH = "/login";
+
+function getDashboardPath(role: AppRole): string {
+  switch (role) {
+    case "ADMIN":
+      return "/admin/";
+    case "COACH":
+      return "/coach/";
+    case "CLIENT":
+      return "/client/";
+    default:
+      return LOGIN_PATH;
+  }
+}
+
+function isProtectedPath(pathname: string): boolean {
+  return PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+}
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const token = request.cookies.get("token")?.value;
+  const session = token ? await verifyAuthToken(token) : null;
+
+  const protectedRoute = isProtectedPath(pathname);
+
+  // If already logged in and hits /login, send to their dashboard
+  if (pathname === LOGIN_PATH) {
+    if (session) {
+      return NextResponse.redirect(
+        new URL(getDashboardPath(session.role), request.url)
+      );
+    }
+    return NextResponse.next();
+  }
+
+  // Block unauthenticated access to protected routes
+  if (!session && protectedRoute) {
+    return NextResponse.redirect(new URL(LOGIN_PATH, request.url));
+  }
+
+  const isClientOnboardPath = pathname.startsWith("/client/onboard");
+  const isCoachOnboardPath = pathname.startsWith("/coach/onboard");
+
+  if (session?.role === "CLIENT") {
+    if (!session.isPasswordChanged && protectedRoute && !isClientOnboardPath) {
+      return NextResponse.redirect(new URL("/client/onboard", request.url));
+    }
+
+    if (session.isPasswordChanged && isClientOnboardPath) {
+      return NextResponse.redirect(new URL("/client", request.url));
+    }
+  }
+
+  if (session?.role === "COACH") {
+    if (!session.isPasswordChanged && protectedRoute && !isCoachOnboardPath) {
+      return NextResponse.redirect(new URL("/coach/onboard", request.url));
+    }
+
+    if (session.isPasswordChanged && isCoachOnboardPath) {
+      return NextResponse.redirect(new URL("/coach", request.url));
+    }
+  }
+
+  // Block cross-role access with custom 404
+  if (session && protectedRoute) {
+    const rolePrefix = `/${session.role.toLowerCase()}`;
+
+    if (!pathname.startsWith(rolePrefix)) {
+      return NextResponse.rewrite(new URL("/404", request.url));
+    }
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: [
+    "/admin",
+    "/admin/:path*",
+    "/coach",
+    "/coach/:path*",
+    "/client",
+    "/client/:path*",
+    "/login",
+  ],
+};

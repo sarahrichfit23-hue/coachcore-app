@@ -1,0 +1,178 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===========================================
+// ENUMS
+// ===========================================
+
+enum Role {
+  ADMIN
+  COACH
+  CLIENT
+}
+
+// ===========================================
+// ROLE PERMISSIONS (for role-based authorization)
+// ===========================================
+
+model RolePermission {
+  id        String   @id @default(cuid())
+  role      Role     @unique
+  scopes    String[] // Array of route scopes e.g., ["/client/message", "/coach/dashboard", "/coach/manage"]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([role])
+  @@map("role_permissions")
+}
+
+// ===========================================
+// USER MODEL
+// ===========================================
+
+model User {
+  id                String  @id @default(cuid())
+  email             String  @unique
+  password          String
+  name              String
+  role              Role    @default(CLIENT)
+  isPasswordChanged Boolean @default(false) // First login flow: must change generated password
+  isActive          Boolean @default(true) // Admin can suspend accounts
+  avatarUrl         String?
+
+  // Session token (for simple auth without OAuth)
+  token       String?   @unique
+  tokenExpiry DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Profile relations (one-to-one based on role)
+  coachProfile  CoachProfile?
+  clientProfile ClientProfile?
+
+  // Messaging relations
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
+// ===========================================
+// COACH PROFILE
+// ===========================================
+
+model CoachProfile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Template document (React-Page JSON content)
+  // Structure: { sections: [{ name, pages: [{ title, content }] }] }
+  template Json?
+
+  // Track if coach has completed initial profile setup
+  isProfileComplete Boolean @default(false)
+
+  // Clients managed by this coach
+  clients ClientProfile[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("coach_profiles")
+}
+
+// ===========================================
+// CLIENT PROFILE
+// ===========================================
+
+model ClientProfile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Coach relation (client belongs to one coach)
+  coachId String
+  coach   CoachProfile @relation(fields: [coachId], references: [id], onDelete: Cascade)
+
+  // Personalized document (copied and customized from coach's template)
+  document Json?
+
+  // Number of phases for progress tracking (defined by coach during onboarding)
+  totalPhases Int @default(3)
+
+  // Progress tracking
+  progress Progress[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([coachId])
+  @@map("client_profiles")
+}
+
+// ===========================================
+// PROGRESS TRACKING
+// ===========================================
+
+model Progress {
+  id              String        @id @default(cuid())
+  clientProfileId String
+  clientProfile   ClientProfile @relation(fields: [clientProfileId], references: [id], onDelete: Cascade)
+
+  // Phase number (1-based, up to client's totalPhases)
+  phaseNumber Int
+
+  // Photo URLs (stored in Cloudflare R2) - 3 photos per phase
+  photo1Url String?
+  photo2Url String?
+  photo3Url String?
+
+  // Phase completion status
+  isCompleted Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Each client can only have one progress record per phase
+  @@unique([clientProfileId, phaseNumber])
+  @@index([clientProfileId])
+  @@map("progress")
+}
+
+// ===========================================
+// MESSAGING
+// ===========================================
+
+model Message {
+  id      String @id @default(cuid())
+  content String @db.Text
+
+  senderId String
+  sender   User   @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+
+  receiverId String
+  receiver   User   @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  isRead Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  // Indexes for efficient polling queries
+  @@index([senderId, createdAt])
+  @@index([receiverId, createdAt])
+  @@index([receiverId, isRead])
+  @@map("messages")
+}

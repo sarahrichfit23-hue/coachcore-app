@@ -1,0 +1,94 @@
+{
+  "sections": [
+    {
+      "id": "de7a7a4c-5f69-45ec-8aac-6df5ebc42f37",
+      "name": "Onboarding",
+      "pages": [
+        {
+          "id": "00d5b7e1-1c5f-4d2d-90d9-7d63272d0301",
+          "title": "Start Here",
+          "hidden": false,
+          "json": {}
+        },
+        {
+          "id": "f8f2c6ac-0b14-4be1-9f67-3d8c30c3f090",
+          "title": "Coaching Agreement",
+          "hidden": false,
+          "json": {}
+        },
+        {
+          "id": "8dfadf30-64c8-4c6f-bb1f-3c1c70e5d8a9",
+          "title": "Payment & Billing",
+          "hidden": false,
+          "json": {}
+        },
+        {
+          "id": "6e4c4e4b-0f66-41e6-9470-7ec40b7656d2",
+          "title": "Intake Questionnaire",
+          "hidden": false,
+          "json": {}
+        },
+        {
+          "id": "7b99c2e4-5e3f-4d58-97fc-0685db70e483",
+          "title": "Your Fitness & Nutrition Program",
+          "hidden": false,
+          "json": {}
+        }
+      ]
+    },
+    {
+      "id": "724bdc54-6206-4b8c-b13f-118788f3b77a",
+      "name": "Program",
+      "pages": [
+        {
+          "id": "0a4698ab-0ea0-4e71-8a37-4f984bc3f927",
+          "title": "Course Material",
+          "hidden": false,
+          "json": {}
+        },
+        {
+          "id": "f6dc77b8-1f9d-4bf6-9d20-5a454c9d1b76",
+          "title": "Course Notes",
+          "hidden": false,
+          "json": {}
+        },
+        {
+          "id": "4cf694cf-0484-4e7f-9c76-6d9f964c9268",
+          "title": "Resources",
+          "hidden": false,
+          "json": {}
+        }
+      ]
+    },
+    {
+      "id": "9b3ac334-6db8-49b6-a95e-1f16ce44fc31",
+      "name": "Offboarding",
+      "pages": [
+        {
+          "id": "6edbb6d5-4e4c-43da-baaa-2cbd7dc6cb73",
+          "title": "Program Recap",
+          "hidden": false,
+          "json": {}
+        },
+        {
+          "id": "1c57a2bb-c4fa-4fc6-8c2a-cc8d2e6e7191",
+          "title": "Final Reflection",
+          "hidden": false,
+          "json": {}
+        },
+        {
+          "id": "7c7d5e7a-b5ab-47e6-86d2-760cead627d0",
+          "title": "Feedback",
+          "hidden": false,
+          "json": {}
+        },
+        {
+          "id": "b5c0981d-07a2-4f6f-8c1c-5c3cb404fa8a",
+          "title": "Next Steps",
+          "hidden": false,
+          "json": {}
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Welcome to {{PLATFORM_NAME}}</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background: #f4f6f8;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      table {
+        border-collapse: collapse;
+      }
+      img {
+        border: 0;
+      }
+      .wrapper {
+        width: 100%;
+        padding: 24px 14px;
+        background: #f4f6f8;
+      }
+      .card {
+        max-width: 560px;
+        margin: 0 auto;
+        background: #ffffff;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+      }
+      .header {
+        padding: 22px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .header img {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+      }
+      .header-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #111827;
+        margin: 0;
+      }
+      .hero {
+        padding: 20px 22px;
+      }
+      .title {
+        font-size: 22px;
+        font-weight: 700;
+        margin: 0 0 10px 0;
+        color: #111827;
+      }
+      .text {
+        font-size: 15px;
+        line-height: 1.5;
+        color: #374151;
+        margin: 0 0 16px 0;
+      }
+      .info-box {
+        background: #f9fafb;
+        padding: 16px;
+        border-radius: 8px;
+        margin-bottom: 18px;
+      }
+      .info-box p {
+        margin: 6px 0;
+        font-size: 15px;
+        color: #111827;
+      }
+      .label {
+        font-weight: 700;
+        color: #111827;
+      }
+      .cta {
+        padding: 0 22px 24px 22px;
+      }
+      .btn {
+        display: inline-block;
+        padding: 12px 20px;
+        background: #2563eb;
+        color: #ffffff !important;
+        text-decoration: none;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 600;
+      }
+      .footer {
+        text-align: center;
+        padding: 18px 22px;
+        font-size: 12px;
+        color: #9ca3af;
+        background: #fafafa;
+      }
+      .footer a {
+        color: #6b7280;
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+
+  <body>
+    <table class="wrapper" width="100%" role="presentation">
+      <tr>
+        <td align="center">
+          <table class="card" role="presentation" width="100%">
+            <!-- Header -->
+            <tr>
+              <td class="header">
+                <img src="{{LOGO_URL}}" alt="Platform Logo" />
+                <h1 class="header-title">{{PLATFORM_NAME}}</h1>
+              </td>
+            </tr>
+
+            <!-- Main Content -->
+            <tr>
+              <td class="hero">
+                <h2 class="title">
+                  Welcome to {{PLATFORM_NAME}}, {{CLIENT_NAME}}! 🎉
+                </h2>
+
+                <p class="text">
+                  Your account has been created. Use the temporary password
+                  below to sign in and finish onboarding.
+                </p>
+
+                <p class="text">Your login details:</p>
+
+                <div class="info-box">
+                  <p><span class="label">Email:</span> {{CLIENT_EMAIL}}</p>
+                  <p>
+                    <span class="label">Password:</span>
+                    {{TEMP_PASSWORD}}
+                  </p>
+                </div>
+
+                <p class="text">
+                  For security, please click the button below and *set your new
+                  password* before logging in.
+                </p>
+              </td>
+            </tr>
+
+            <!-- CTA -->
+            <tr>
+              <td class="cta">
+                <a
+                  href="{{SET_PASSWORD_URL}}"
+                  class="btn"
+                  target="_blank"
+                  rel="noopener"
+                  >Set Your Password</a
+                >
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td class="footer">
+                If you didn’t expect this email, you can safely ignore it.<br />
+                Need help? <a href="{{SUPPORT_URL}}">Contact Support</a
+                ><br /><br />
+                © {{YEAR}} {{PLATFORM_NAME}}. All rights reserved.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
