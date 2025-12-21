@@ -152,21 +152,21 @@ export async function GET(request: NextRequest) {
           contact_id: string;
           id: string;
           content: string;
-          sender_id: string;
-          created_at: Date;
-          is_read: boolean;
+          senderId: string;
+          createdAt: Date;
+          isRead: boolean;
         }>
       >`
         SELECT DISTINCT ON (contact_id) 
           CASE 
-            WHEN m.sender_id = ${session.userId} THEN m.receiver_id
-            ELSE m.sender_id
+            WHEN m."senderId" = ${session.userId} THEN m."receiverId"
+            ELSE m."senderId"
           END as contact_id,
-          m.id, m.content, m.sender_id, m.created_at, m.is_read
+          m.id, m.content, m."senderId", m."createdAt", m."isRead"
         FROM messages m
-        WHERE (m.sender_id = ${session.userId} AND m.receiver_id = ANY(${contactIds}::text[]))
-           OR (m.receiver_id = ${session.userId} AND m.sender_id = ANY(${contactIds}::text[]))
-        ORDER BY contact_id, m.created_at DESC
+        WHERE (m."senderId" = ${session.userId} AND m."receiverId" = ANY(${contactIds}::text[]))
+           OR (m."receiverId" = ${session.userId} AND m."senderId" = ANY(${contactIds}::text[]))
+        ORDER BY contact_id, m."createdAt" DESC
       `,
       // Get unread counts for all contacts
       prisma.message.groupBy({
@@ -202,9 +202,9 @@ export async function GET(request: NextRequest) {
         lastMessage: lastMessage
           ? {
               content: lastMessage.content,
-              sentAt: lastMessage.created_at.toISOString(),
-              isFromMe: lastMessage.sender_id === session.userId,
-              isRead: lastMessage.is_read,
+              sentAt: lastMessage.createdAt.toISOString(),
+              isFromMe: lastMessage.senderId === session.userId,
+              isRead: lastMessage.isRead,
             }
           : null,
         unreadCount,
