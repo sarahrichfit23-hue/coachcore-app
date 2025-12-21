@@ -28,19 +28,31 @@ export async function middleware(request: NextRequest) {
 
   const protectedRoute = isProtectedPath(pathname);
 
-  // If already logged in and hits /login, send to their dashboard
+  // If on login page
   if (pathname === LOGIN_PATH) {
+    // If they have a valid session, redirect to dashboard
     if (session) {
       return NextResponse.redirect(
         new URL(getDashboardPath(session.role), request.url),
       );
+    }
+    // If they have an invalid token, clear it
+    if (token && !session) {
+      const response = NextResponse.next();
+      response.cookies.delete("token");
+      return response;
     }
     return NextResponse.next();
   }
 
   // Block unauthenticated access to protected routes
   if (!session && protectedRoute) {
-    return NextResponse.redirect(new URL(LOGIN_PATH, request.url));
+    const response = NextResponse.redirect(new URL(LOGIN_PATH, request.url));
+    // Clear invalid token when redirecting to login
+    if (token) {
+      response.cookies.delete("token");
+    }
+    return response;
   }
 
   const isClientOnboardPath = pathname.startsWith("/client/onboard");

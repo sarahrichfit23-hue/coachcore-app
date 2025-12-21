@@ -4,17 +4,27 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { Eye, EyeOff } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+type ResetPasswordData = {
+  role: "ADMIN" | "COACH" | "CLIENT";
+  isPasswordChanged: boolean;
+};
+
 interface ResetPasswordResponse {
   success: boolean;
-  data?: {
-    role: "ADMIN" | "COACH" | "CLIENT";
-    isPasswordChanged: boolean;
-  };
+  data?: ResetPasswordData;
   error?: string;
+}
+
+interface ResetPasswordFormProps {
+  endpoint?: string;
+  successRedirectPath?: string;
+  successMessage?: string;
+  onSuccess?: (data: ResetPasswordData) => void;
 }
 
 function getRedirectPath(role: string): string {
@@ -30,7 +40,12 @@ function getRedirectPath(role: string): string {
   }
 }
 
-export function ResetPasswordForm() {
+export function ResetPasswordForm({
+  endpoint = "/api/auth/reset-password",
+  successRedirectPath,
+  successMessage,
+  onSuccess,
+}: ResetPasswordFormProps) {
   const router = useRouter();
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -38,9 +53,9 @@ export function ResetPasswordForm() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const resetMutation = useMutation({
+  const resetMutation = useMutation<ResetPasswordData>({
     mutationFn: async () => {
-      const response = await fetch("/api/auth/reset-password", {
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -58,6 +73,20 @@ export function ResetPasswordForm() {
       return data.data;
     },
     onSuccess: (data) => {
+      if (onSuccess) {
+        onSuccess(data);
+        return;
+      }
+
+      if (successMessage) {
+        toast.success(successMessage);
+      }
+
+      if (successRedirectPath) {
+        router.replace(successRedirectPath);
+        return;
+      }
+
       const redirect = getRedirectPath(data.role);
       router.replace(redirect);
     },

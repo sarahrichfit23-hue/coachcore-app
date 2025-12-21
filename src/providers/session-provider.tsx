@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import {
   createContext,
   useCallback,
@@ -34,7 +33,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   const fetchUser = useCallback(async () => {
     try {
@@ -46,14 +44,19 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        console.warn("Session fetch failed:", response.status, errorData);
+        console.warn("Session fetch failed:", response.status);
         setUser(null);
+
+        // Don't redirect here - let middleware handle it
+        // The middleware will catch the invalid session and redirect
         if (response.status === 401) {
-          // If no session is present, simply stay on the current page.
+          setError("Session expired");
           return;
         }
-        router.push("/login");
+
+        // For other errors, just set the error state
+        const errorData = await response.json();
+        setError(errorData.message || "Failed to fetch session");
         return;
       }
 
@@ -68,7 +71,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, [router]);
+  }, []); // Remove router dependency since we're using window.location.href
 
   const handleLogout = () => {
     setUser(null);

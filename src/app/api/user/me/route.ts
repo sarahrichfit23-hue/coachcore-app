@@ -56,7 +56,7 @@ export async function GET() {
     if (!user || !user.isActive) {
       return NextResponse.json(
         { success: false, error: "User not found or inactive" },
-        { status: 404 },
+        { status: 401 },
       );
     }
 

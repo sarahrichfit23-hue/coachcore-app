@@ -13,8 +13,21 @@ import {
   useInfiniteQuery,
   useMutation,
   useQueryClient,
+  type InfiniteData,
 } from "@tanstack/react-query";
 import { CoachCoreLoader } from "@/components/ui/loader";
+
+type ChatMessageWithLocal = ChatMessage & {
+  optimisticId?: string;
+  status?: "pending" | "error";
+};
+
+type MessagesPageResult = {
+  messages: ChatMessageWithLocal[];
+  nextOffset: number | undefined;
+};
+
+type MessagesInfiniteData = InfiniteData<MessagesPageResult>;
 
 // Fetch contacts
 const fetchContacts = async (): Promise<Contact[]> => {
@@ -33,7 +46,10 @@ const fetchMessages = async ({
 }: {
   userId: string;
   pageParam?: number;
-}): Promise<{ messages: ChatMessage[]; nextOffset: number | undefined }> => {
+}): Promise<{
+  messages: ChatMessageWithLocal[];
+  nextOffset: number | undefined;
+}> => {
   const limit = 7;
   const response = await fetch(
     `/api/chat/messages?userId=${userId}&limit=${limit}&offset=${pageParam}`,
@@ -78,6 +94,7 @@ function MessagesPageContent() {
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [messageText, setMessageText] = useState("");
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const hasInitializedSelection = useRef(false);
 
   // Fetch contacts
   const { data: contacts = [], isLoading: loadingContacts } = useQuery({
@@ -102,61 +119,156 @@ function MessagesPageContent() {
     initialPageParam: 0,
   });
 
-  // Send message mutation
+  // Send message mutation with optimistic UI updates
   const sendMessageMutation = useMutation({
     mutationFn: sendMessage,
-    onSuccess: (newMessage) => {
-      // Optimistically update messages
-      queryClient.setQueryData(
-        ["messages", selectedContact?.id],
-        (old: any) => {
+    onMutate: async ({ receiverId, content }) => {
+      if (!selectedContact || !user) return {};
+
+      await queryClient.cancelQueries({ queryKey: ["messages", receiverId] });
+
+      const optimisticId = `optimistic-${Date.now()}`;
+      const optimisticMessage: ChatMessageWithLocal = {
+        id: optimisticId,
+        optimisticId,
+        content,
+        senderId: user.id,
+        receiverId,
+        isRead: true,
+        createdAt: new Date().toISOString(),
+        sender: {
+          id: user.id,
+          name: user.name ?? "You",
+          email: user.email ?? "",
+          role: user.role,
+        },
+        receiver: {
+          id: selectedContact.id,
+          name: selectedContact.name,
+          email: selectedContact.email,
+          role: selectedContact.role,
+        },
+        status: "pending",
+      };
+
+      const previousMessages = queryClient.getQueryData<MessagesInfiniteData>([
+        "messages",
+        receiverId,
+      ]);
+
+      queryClient.setQueryData<MessagesInfiniteData>(
+        ["messages", receiverId],
+        (old) => {
           if (!old)
             return {
-              pages: [{ messages: [newMessage], nextOffset: undefined }],
+              pages: [
+                {
+                  messages: [optimisticMessage],
+                  nextOffset: undefined,
+                },
+              ],
               pageParams: [0],
             };
+
           return {
             ...old,
-            pages: old.pages.map((page: any, index: number) =>
+            pages: old.pages.map((page, index) =>
               index === 0
-                ? { ...page, messages: [newMessage, ...page.messages] }
+                ? { ...page, messages: [optimisticMessage, ...page.messages] }
                 : page,
             ),
           };
         },
       );
+
       setMessageText("");
+
+      return { previousMessages, optimisticId };
+    },
+    onSuccess: (newMessage, variables, context) => {
+      const receiverId = variables.receiverId;
+
+      queryClient.setQueryData<MessagesInfiniteData>(
+        ["messages", receiverId],
+        (old) => {
+          if (!old) return old;
+
+          return {
+            ...old,
+            pages: old.pages.map((page, index) => {
+              if (index !== 0) return page;
+
+              const hasOptimistic = page.messages.some(
+                (message) => message.optimisticId === context?.optimisticId,
+              );
+
+              const updatedMessages = hasOptimistic
+                ? page.messages.map((message) =>
+                    message.optimisticId === context?.optimisticId
+                      ? newMessage
+                      : message,
+                  )
+                : [newMessage, ...page.messages];
+
+              return { ...page, messages: updatedMessages };
+            }),
+          };
+        },
+      );
+    },
+    onError: (_error, variables, context) => {
+      const receiverId = variables.receiverId;
+      if (!context?.optimisticId) return;
+
+      queryClient.setQueryData<MessagesInfiniteData>(
+        ["messages", receiverId],
+        (old) => {
+          if (!old) return old;
+
+          return {
+            ...old,
+            pages: old.pages.map((page, index) =>
+              index === 0
+                ? {
+                    ...page,
+                    messages: page.messages.map((message) =>
+                      message.optimisticId === context.optimisticId
+                        ? { ...message, status: "error" }
+                        : message,
+                    ),
+                  }
+                : page,
+            ),
+          };
+        },
+      );
     },
   });
 
   // Flatten messages from all pages
-  const allMessages = useMemo(() => {
+  const allMessages = useMemo<ChatMessageWithLocal[]>(() => {
     return messagesData?.pages.flatMap((page) => page.messages) || [];
   }, [messagesData]);
 
   const preferredContactId = searchParams.get("contactId");
 
-  // Prefer contactId from URL, otherwise fall back to the first contact
+  // Prefer contactId from URL only on first render, then allow free switching
   useEffect(() => {
     if (!contacts.length) return;
 
-    const preferredContact = preferredContactId
-      ? contacts.find((contact) => contact.id === preferredContactId)
-      : null;
+    const stillExists = selectedContact
+      ? contacts.some((contact) => contact.id === selectedContact.id)
+      : false;
 
-    if (preferredContact && preferredContact.id !== selectedContact?.id) {
-      setSelectedContact(preferredContact);
+    if (!hasInitializedSelection.current) {
+      const preferredContact = preferredContactId
+        ? contacts.find((contact) => contact.id === preferredContactId)
+        : null;
+
+      setSelectedContact(preferredContact ?? contacts[0]);
+      hasInitializedSelection.current = true;
       return;
     }
-
-    if (!selectedContact) {
-      setSelectedContact(contacts[0]);
-      return;
-    }
-
-    const stillExists = contacts.some(
-      (contact) => contact.id === selectedContact.id,
-    );
 
     if (!stillExists) {
       setSelectedContact(contacts[0]);
@@ -199,6 +311,36 @@ function MessagesPageContent() {
     sendMessageMutation.mutate({
       receiverId: selectedContact.id,
       content: messageText,
+    });
+  };
+
+  const handleRetry = (message: ChatMessageWithLocal) => {
+    if (!selectedContact || !message.optimisticId) return;
+
+    queryClient.setQueryData<MessagesInfiniteData>(
+      ["messages", selectedContact.id],
+      (old) => {
+        if (!old) return old;
+
+        return {
+          ...old,
+          pages: old.pages.map((page, index) =>
+            index === 0
+              ? {
+                  ...page,
+                  messages: page.messages.filter(
+                    (msg) => msg.optimisticId !== message.optimisticId,
+                  ),
+                }
+              : page,
+          ),
+        };
+      },
+    );
+
+    sendMessageMutation.mutate({
+      receiverId: selectedContact.id,
+      content: message.content,
     });
   };
 
@@ -353,6 +495,8 @@ function MessagesPageContent() {
                       .reverse()
                       .map((message, index) => {
                         const isMe = message.senderId === user?.id;
+                        const isPending = message.status === "pending";
+                        const isError = message.status === "error";
                         return (
                           <div
                             key={`${message.id}-${index}`}
@@ -382,14 +526,28 @@ function MessagesPageContent() {
                                 <p className="text-sm">{message.content}</p>
                               </div>
                               <span className="mt-1 text-xs text-gray-500">
-                                {new Date(message.createdAt).toLocaleTimeString(
-                                  [],
-                                  {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  },
-                                )}
+                                {isPending
+                                  ? "Sending..."
+                                  : new Date(
+                                      message.createdAt,
+                                    ).toLocaleTimeString([], {
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    })}
                               </span>
+                              {isError && (
+                                <div className="mt-1 flex items-center gap-2 text-xs text-red-600">
+                                  <span>Failed to send</span>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 px-2 text-xs"
+                                    onClick={() => handleRetry(message)}
+                                  >
+                                    Retry
+                                  </Button>
+                                </div>
+                              )}
                             </div>
                           </div>
                         );
@@ -407,15 +565,12 @@ function MessagesPageContent() {
                     onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
                     placeholder="Type something to send..."
                     className="h-12 flex-1 rounded-full border-gray-300 bg-white px-6"
-                    disabled={sendMessageMutation.isPending}
                   />
                   <Button
                     onClick={handleSendMessage}
                     className="h-12 w-12 rounded-full bg-[#fcca56] text-gray-900 hover:bg-[#fbc041]"
                     size="icon"
-                    disabled={
-                      sendMessageMutation.isPending || !messageText.trim()
-                    }
+                    disabled={!messageText.trim()}
                   >
                     {sendMessageMutation.isPending ? (
                       <Loader className="h-5 w-5 animate-spin" />

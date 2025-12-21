@@ -31,7 +31,12 @@ const eslintConfig = [
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
       ],
       "@typescript-eslint/no-explicit-any": "warn",
-      "prettier/prettier": "error",
+      "prettier/prettier": [
+        "error",
+        {
+          commaDangle: "none",
+        },
+      ],
     },
   },
 ];
