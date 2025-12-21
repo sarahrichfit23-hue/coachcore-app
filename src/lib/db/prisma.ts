@@ -18,6 +18,9 @@ export const prisma =
     },
   });
 
+// Enable connection pooling for serverless environments
+prisma.$connect();
+
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
 export default prisma;

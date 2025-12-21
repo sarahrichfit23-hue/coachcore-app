@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { clearAuthCookie } from "@/lib/auth/token";
 
 export async function POST(request: NextRequest) {
-  const redirectUrl = new URL("/login", request.url);
-  const response = NextResponse.redirect(redirectUrl);
+  const response = NextResponse.json({ success: true });
   response.cookies.set(clearAuthCookie());
   return response;
 }

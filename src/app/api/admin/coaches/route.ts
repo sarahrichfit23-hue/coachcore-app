@@ -27,44 +27,73 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const coaches = await prisma.user.findMany({
-      where: {
-        role: "COACH",
-        isActive: true,
-      },
-      orderBy: { name: "asc" },
-      include: {
-        coachProfile: {
-          include: {
-            clients: {
-              orderBy: { createdAt: "desc" },
-              include: {
-                user: {
-                  select: {
-                    id: true,
-                    name: true,
-                    email: true,
-                    isActive: true,
-                  },
-                },
-              },
+    // Optimized: fetch coaches and their client counts in parallel
+    const [coaches, clientCounts] = await Promise.all([
+      prisma.user.findMany({
+        where: {
+          role: "COACH",
+          isActive: true,
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          coachProfile: {
+            select: {
+              id: true,
             },
           },
         },
-      },
-    });
+        orderBy: { name: "asc" },
+      }),
+      // Get all active clients grouped by coach in one query
+      prisma.clientProfile.findMany({
+        where: {
+          user: {
+            isActive: true,
+          },
+          coach: {
+            user: {
+              role: "COACH",
+              isActive: true,
+            },
+          },
+        },
+        select: {
+          id: true,
+          coachId: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+    ]);
+
+    // Group clients by coach ID
+    const clientsByCoach = new Map<string, typeof clientCounts>();
+    for (const client of clientCounts) {
+      const existing = clientsByCoach.get(client.coachId) || [];
+      existing.push(client);
+      clientsByCoach.set(client.coachId, existing);
+    }
 
     const payload = coaches.map((coach) => {
-      const activeClients = (coach.coachProfile?.clients ?? []).filter(
-        (client) => client.user?.isActive,
-      );
+      const coachProfileId = coach.coachProfile?.id;
+      const coachClients = coachProfileId
+        ? clientsByCoach.get(coachProfileId) || []
+        : [];
 
       return {
         id: coach.id,
         name: coach.name,
         email: coach.email,
-        totalClients: activeClients.length,
-        clients: activeClients.map((client) => ({
+        totalClients: coachClients.length,
+        clients: coachClients.map((client) => ({
           id: client.id,
           userId: client.user.id,
           name: client.user.name,

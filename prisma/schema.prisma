@@ -66,6 +66,8 @@ model User {
 
   @@index([email])
   @@index([role])
+  @@index([role, isActive])
+  @@index([isActive])
   @@map("users")
 }
 
@@ -120,6 +122,7 @@ model ClientProfile {
   updatedAt DateTime @updatedAt
 
   @@index([coachId])
+  @@index([coachId, createdAt])
   @@map("client_profiles")
 }
 

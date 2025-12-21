@@ -141,61 +141,75 @@ export async function GET(request: NextRequest) {
       contacts = coaches as (typeof user)[];
     }
 
-    // Get last message info for each contact
-    const contactsWithLastMessage = await Promise.all(
-      contacts.map(async (contact) => {
-        const lastMessage = await prisma.message.findFirst({
-          where: {
-            OR: [
-              {
-                senderId: session.userId,
-                receiverId: contact.id,
-              },
-              {
-                senderId: contact.id,
-                receiverId: session.userId,
-              },
-            ],
-          },
-          select: {
-            id: true,
-            content: true,
-            senderId: true,
-            createdAt: true,
-            isRead: true,
-          },
-          orderBy: {
-            createdAt: "desc",
-          },
-          take: 1,
-        });
+    // Get last message info and unread counts for all contacts in one query
+    const contactIds = contacts.map((c) => c.id);
 
-        // Get unread count from this contact
-        const unreadCount = await prisma.message.count({
-          where: {
-            senderId: contact.id,
-            receiverId: session.userId,
-            isRead: false,
-          },
-        });
-
-        return {
-          id: contact.id,
-          email: contact.email,
-          name: contact.name,
-          role: contact.role,
-          lastMessage: lastMessage
-            ? {
-                content: lastMessage.content,
-                sentAt: lastMessage.createdAt.toISOString(),
-                isFromMe: lastMessage.senderId === session.userId,
-                isRead: lastMessage.isRead,
-              }
-            : null,
-          unreadCount,
-        };
+    // Fetch all last messages for contacts in parallel
+    const [lastMessages, unreadCounts] = await Promise.all([
+      // Get last message for each contact
+      prisma.$queryRaw<
+        Array<{
+          contact_id: string;
+          id: string;
+          content: string;
+          sender_id: string;
+          created_at: Date;
+          is_read: boolean;
+        }>
+      >`
+        SELECT DISTINCT ON (contact_id) 
+          CASE 
+            WHEN m.sender_id = ${session.userId} THEN m.receiver_id
+            ELSE m.sender_id
+          END as contact_id,
+          m.id, m.content, m.sender_id, m.created_at, m.is_read
+        FROM messages m
+        WHERE (m.sender_id = ${session.userId} AND m.receiver_id = ANY(${contactIds}::text[]))
+           OR (m.receiver_id = ${session.userId} AND m.sender_id = ANY(${contactIds}::text[]))
+        ORDER BY contact_id, m.created_at DESC
+      `,
+      // Get unread counts for all contacts
+      prisma.message.groupBy({
+        by: ["senderId"],
+        where: {
+          senderId: { in: contactIds },
+          receiverId: session.userId,
+          isRead: false,
+        },
+        _count: {
+          id: true,
+        },
       }),
+    ]);
+
+    // Create maps for quick lookup
+    const lastMessageMap = new Map(
+      lastMessages.map((msg) => [msg.contact_id, msg]),
     );
+    const unreadCountMap = new Map(
+      unreadCounts.map((uc) => [uc.senderId, uc._count.id]),
+    );
+
+    const contactsWithLastMessage = contacts.map((contact) => {
+      const lastMessage = lastMessageMap.get(contact.id);
+      const unreadCount = unreadCountMap.get(contact.id) || 0;
+
+      return {
+        id: contact.id,
+        email: contact.email,
+        name: contact.name,
+        role: contact.role,
+        lastMessage: lastMessage
+          ? {
+              content: lastMessage.content,
+              sentAt: lastMessage.created_at.toISOString(),
+              isFromMe: lastMessage.sender_id === session.userId,
+              isRead: lastMessage.is_read,
+            }
+          : null,
+        unreadCount,
+      };
+    });
 
     // Sort by last message time (most recent first)
     const sortedContacts = contactsWithLastMessage.sort((a, b) => {
