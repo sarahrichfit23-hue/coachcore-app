@@ -42,13 +42,13 @@ export async function GET(request: NextRequest) {
     // Optimized: Use aggregations instead of counts with $transaction
     const [totalClients, activeClients, totalProgressEntries, unreadMessages] =
       await Promise.all([
-        prisma.clientProfile.count({ 
-          where: { coachId: coachProfile.id } 
+        prisma.clientProfile.count({
+          where: { coachId: coachProfile.id },
         }),
         prisma.clientProfile.count({
-          where: { 
-            coachId: coachProfile.id, 
-            user: { isActive: true } 
+          where: {
+            coachId: coachProfile.id,
+            user: { isActive: true },
           },
         }),
         prisma.progress.count({
