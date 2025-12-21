@@ -57,7 +57,9 @@ export async function renderOnboardingTemplate(
     SET_PASSWORD_URL: params.setPasswordUrl,
     YEAR: String(new Date().getFullYear()),
     PLATFORM_NAME: params.platformName,
-    LOGO_URL: params.logoUrl ?? "",
+    LOGO_URL:
+      params.logoUrl ??
+      `${process.env.NEXT_PUBLIC_APP_URL}/coach-core-logo-new.png`,
     SUPPORT_URL: params.supportUrl ?? "#",
   };
 
