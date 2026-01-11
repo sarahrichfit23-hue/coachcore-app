@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Loader2, Trash2, FilePenLine } from "lucide-react";
+import { Plus, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { DEFAULT_DOCUMENT_TEMPLATE } from "@/lib/document-template";
 import { type PortalTemplate } from "@/types";
 
 async function fetchTemplates(): Promise<PortalTemplate[]> {
@@ -83,7 +82,6 @@ export default function PortalTemplatesPage() {
         body: JSON.stringify({
           name: variables.name,
           description: variables.description,
-          document: DEFAULT_DOCUMENT_TEMPLATE,
         }),
       });
 
