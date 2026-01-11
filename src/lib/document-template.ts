@@ -193,12 +193,15 @@ export function isValidDocumentTemplate(
     return false;
   }
 
+  const validSectionNames = ["Onboarding", "Program", "Offboarding"];
+
   return doc.sections.every((section: unknown) => {
     if (!section || typeof section !== "object") return false;
 
     const sec = section as { id?: unknown; name?: unknown; pages?: unknown };
     if (typeof sec.id !== "string") return false;
     if (typeof sec.name !== "string") return false;
+    if (!validSectionNames.includes(sec.name)) return false;
     if (!Array.isArray(sec.pages)) return false;
 
     return sec.pages.every((page: unknown) => {
