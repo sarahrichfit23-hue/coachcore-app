@@ -106,8 +106,6 @@ export async function POST(request: NextRequest) {
     const name = (body?.name as string | undefined)?.trim();
     const description = (body?.description as string | undefined)?.trim();
 
-    console.log("Create template request - name:", name);
-
     if (!name) {
       return NextResponse.json(
         { success: false, error: "Template name is required" },
@@ -117,11 +115,6 @@ export async function POST(request: NextRequest) {
 
     // Create a fresh document template with new IDs on the server side
     const document = createDocumentTemplateWithIds();
-
-    console.log(
-      "Created document template with sections:",
-      document.sections.length,
-    );
 
     const template = await prisma.portalTemplate.create({
       data: {
@@ -138,17 +131,8 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     console.error("Create portal template error:", error);
-    console.error("Error details:", {
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-      name: error instanceof Error ? error.name : undefined,
-    });
     return NextResponse.json(
-      {
-        success: false,
-        error: "Unable to create template",
-        details: error instanceof Error ? error.message : String(error),
-      },
+      { success: false, error: "Unable to create template" },
       { status: 500 },
     );
   }
