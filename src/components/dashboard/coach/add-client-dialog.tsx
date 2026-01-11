@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -16,6 +16,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { coachClientsQueryKey } from "@/lib/query-keys";
 
 interface Client {
@@ -34,19 +41,47 @@ interface CreateClientResponse {
   error?: string;
 }
 
+interface PortalTemplate {
+  id: string;
+  name: string;
+  description: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export function AddClientDialog() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [progressPhases, setProgressPhases] = useState(3);
+  const [templateId, setTemplateId] = useState<string>("");
   const [formError, setFormError] = useState("");
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const { data: templates = [] } = useQuery<PortalTemplate[]>({
+    queryKey: ["portal-templates"],
+    queryFn: async () => {
+      const response = await fetch("/api/coach/portal-templates", {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch templates");
+      }
+      const data = (await response.json()) as {
+        success: boolean;
+        data?: PortalTemplate[];
+      };
+      return data.data || [];
+    },
+    enabled: open,
+  });
 
   const resetState = () => {
     setName("");
     setEmail("");
     setProgressPhases(3);
+    setTemplateId("");
     setFormError("");
     setSuccessMessage(null);
   };
@@ -63,6 +98,7 @@ export function AddClientDialog() {
       name: string;
       email: string;
       progressPhases: number;
+      templateId?: string;
     }) => {
       const response = await fetch("/api/coach/create-client", {
         method: "POST",
@@ -72,6 +108,7 @@ export function AddClientDialog() {
           name: variables.name,
           email: variables.email,
           progressPhases: variables.progressPhases,
+          templateId: variables.templateId || undefined,
         }),
       });
 
@@ -123,6 +160,7 @@ export function AddClientDialog() {
       name: name.trim(),
       email: email.trim().toLowerCase(),
       progressPhases,
+      templateId: templateId || undefined,
     });
   };
 
@@ -212,6 +250,28 @@ export function AddClientDialog() {
                 />
                 <p className="text-xs text-gray-500">
                   How many phases should be created for this client (1-20)?
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="portal-template">
+                  Portal template (optional)
+                </Label>
+                <Select value={templateId} onValueChange={setTemplateId}>
+                  <SelectTrigger id="portal-template">
+                    <SelectValue placeholder="Use default template" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Default template</SelectItem>
+                    {templates.map((template) => (
+                      <SelectItem key={template.id} value={template.id}>
+                        {template.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-gray-500">
+                  Choose a saved template or use the default portal structure.
                 </p>
               </div>
 
