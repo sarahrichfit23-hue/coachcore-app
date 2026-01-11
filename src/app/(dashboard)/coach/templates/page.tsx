@@ -17,15 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DEFAULT_DOCUMENT_TEMPLATE } from "@/lib/document-template";
-import { type DocumentTemplate } from "@/types";
-
-interface PortalTemplate {
-  id: string;
-  name: string;
-  description: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
+import { type PortalTemplate } from "@/types";
 
 async function fetchTemplates(): Promise<PortalTemplate[]> {
   const response = await fetch("/api/coach/portal-templates", {
@@ -50,13 +42,10 @@ async function fetchTemplates(): Promise<PortalTemplate[]> {
 }
 
 async function deleteTemplate(templateId: string): Promise<void> {
-  const response = await fetch(
-    `/api/coach/portal-templates/${templateId}`,
-    {
-      method: "DELETE",
-      credentials: "include",
-    },
-  );
+  const response = await fetch(`/api/coach/portal-templates/${templateId}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
 
   const payload = (await response.json()) as {
     success: boolean;
@@ -269,9 +258,7 @@ export default function PortalTemplatesPage() {
               <Input
                 id="template-description"
                 value={templateDescription}
-                onChange={(event) =>
-                  setTemplateDescription(event.target.value)
-                }
+                onChange={(event) => setTemplateDescription(event.target.value)}
                 placeholder="Brief description of this template"
               />
             </div>

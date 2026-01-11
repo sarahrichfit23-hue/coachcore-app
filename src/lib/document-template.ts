@@ -180,3 +180,42 @@ export function findPageById(
   }
   return null;
 }
+
+export function isValidDocumentTemplate(
+  document: unknown,
+): document is DocumentTemplate {
+  if (!document || typeof document !== "object") {
+    return false;
+  }
+
+  const doc = document as { sections?: unknown };
+  if (!Array.isArray(doc.sections)) {
+    return false;
+  }
+
+  return doc.sections.every((section: unknown) => {
+    if (!section || typeof section !== "object") return false;
+
+    const sec = section as { id?: unknown; name?: unknown; pages?: unknown };
+    if (typeof sec.id !== "string") return false;
+    if (typeof sec.name !== "string") return false;
+    if (!Array.isArray(sec.pages)) return false;
+
+    return sec.pages.every((page: unknown) => {
+      if (!page || typeof page !== "object") return false;
+
+      const pg = page as {
+        id?: unknown;
+        title?: unknown;
+        hidden?: unknown;
+        json?: unknown;
+      };
+      if (typeof pg.id !== "string") return false;
+      if (typeof pg.title !== "string") return false;
+      if (typeof pg.hidden !== "boolean") return false;
+      if (!pg.json || typeof pg.json !== "object") return false;
+
+      return true;
+    });
+  });
+}

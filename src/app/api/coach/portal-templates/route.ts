@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { verifyAuthToken } from "@/lib/auth/token";
 import { Prisma } from "@prisma/client";
 import { type DocumentTemplate } from "@/types";
+import { isValidDocumentTemplate } from "@/lib/document-template";
 
 // GET - List all portal templates for the coach
 export async function GET(request: NextRequest) {
@@ -105,7 +106,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const name = (body?.name as string | undefined)?.trim();
     const description = (body?.description as string | undefined)?.trim();
-    const document = body?.document as DocumentTemplate | undefined;
+    const document = body?.document;
 
     if (!name) {
       return NextResponse.json(
@@ -114,7 +115,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!document || !Array.isArray(document.sections)) {
+    if (!isValidDocumentTemplate(document)) {
       return NextResponse.json(
         { success: false, error: "Valid document template is required" },
         { status: 400 },

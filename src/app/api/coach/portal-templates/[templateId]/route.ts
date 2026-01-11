@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { verifyAuthToken } from "@/lib/auth/token";
 import { Prisma } from "@prisma/client";
 import { type DocumentTemplate } from "@/types";
+import { isValidDocumentTemplate } from "@/lib/document-template";
 
 // GET - Get a specific portal template
 export async function GET(
@@ -129,7 +130,7 @@ export async function PUT(
     const body = await request.json();
     const name = (body?.name as string | undefined)?.trim();
     const description = (body?.description as string | undefined)?.trim();
-    const document = body?.document as DocumentTemplate | undefined;
+    const document = body?.document;
 
     const updateData: {
       name?: string;
@@ -152,7 +153,7 @@ export async function PUT(
     }
 
     if (document !== undefined) {
-      if (!Array.isArray(document.sections)) {
+      if (!isValidDocumentTemplate(document)) {
         return NextResponse.json(
           { success: false, error: "Invalid document template" },
           { status: 400 },

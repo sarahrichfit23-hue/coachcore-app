@@ -5,6 +5,7 @@ import { verifyAuthToken } from "@/lib/auth/token";
 import {
   cloneTemplateWithNewPageIds,
   DEFAULT_DOCUMENT_TEMPLATE,
+  isValidDocumentTemplate,
 } from "@/lib/document-template";
 import { sendEmail, getEmailConfig } from "@/lib/email/sendEmail";
 import { renderOnboardingTemplate } from "@/lib/email/templates";
@@ -107,6 +108,17 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           { success: false, error: "Selected template not found" },
           { status: 404 },
+        );
+      }
+
+      // Validate the template document structure
+      if (!isValidDocumentTemplate(portalTemplate.document)) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Template document is corrupted or invalid",
+          },
+          { status: 500 },
         );
       }
 

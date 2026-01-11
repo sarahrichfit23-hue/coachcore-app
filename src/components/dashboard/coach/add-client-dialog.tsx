@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { coachClientsQueryKey } from "@/lib/query-keys";
+import { type PortalTemplate } from "@/types";
 
 interface Client {
   id?: string;
@@ -41,21 +42,13 @@ interface CreateClientResponse {
   error?: string;
 }
 
-interface PortalTemplate {
-  id: string;
-  name: string;
-  description: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
 export function AddClientDialog() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [progressPhases, setProgressPhases] = useState(3);
-  const [templateId, setTemplateId] = useState<string>("");
+  const [templateId, setTemplateId] = useState<string | undefined>(undefined);
   const [formError, setFormError] = useState("");
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -81,7 +74,7 @@ export function AddClientDialog() {
     setName("");
     setEmail("");
     setProgressPhases(3);
-    setTemplateId("");
+    setTemplateId(undefined);
     setFormError("");
     setSuccessMessage(null);
   };
@@ -108,7 +101,7 @@ export function AddClientDialog() {
           name: variables.name,
           email: variables.email,
           progressPhases: variables.progressPhases,
-          templateId: variables.templateId || undefined,
+          templateId: variables.templateId,
         }),
       });
 
@@ -160,7 +153,7 @@ export function AddClientDialog() {
       name: name.trim(),
       email: email.trim().toLowerCase(),
       progressPhases,
-      templateId: templateId || undefined,
+      templateId,
     });
   };
 
@@ -257,7 +250,10 @@ export function AddClientDialog() {
                 <Label htmlFor="portal-template">
                   Portal template (optional)
                 </Label>
-                <Select value={templateId} onValueChange={setTemplateId}>
+                <Select
+                  value={templateId || ""}
+                  onValueChange={(val) => setTemplateId(val || undefined)}
+                >
                   <SelectTrigger id="portal-template">
                     <SelectValue placeholder="Use default template" />
                   </SelectTrigger>
