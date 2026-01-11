@@ -5,10 +5,12 @@ import { verifyAuthToken } from "@/lib/auth/token";
 import {
   cloneTemplateWithNewPageIds,
   DEFAULT_DOCUMENT_TEMPLATE,
+  isValidDocumentTemplate,
 } from "@/lib/document-template";
 import { sendEmail, getEmailConfig } from "@/lib/email/sendEmail";
 import { renderOnboardingTemplate } from "@/lib/email/templates";
 import { Prisma } from "@prisma/client";
+import { type DocumentTemplate } from "@/types";
 
 function isValidEmail(email: string): boolean {
   return /.+@.+\..+/.test(email);
@@ -44,6 +46,7 @@ export async function POST(request: NextRequest) {
     const email = (body?.email as string | undefined)?.toLowerCase().trim();
     const rawPhases = body?.progressPhases ?? body?.progressTrackCount ?? 0;
     const progressPhases = Number(rawPhases);
+    const templateId = (body?.templateId as string | undefined)?.trim();
 
     if (!name || !email || !isValidEmail(email)) {
       return NextResponse.json(
@@ -89,17 +92,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // const coachTemplate = coachProfile.template as DocumentTemplate | null;
-    // if (!coachTemplate) {
-    //   return NextResponse.json(
-    //     { success: false, error: "Coach template not configured" },
-    //     { status: 400 }
-    //   );
-    // }
+    // Determine which template to use
+    let templateToUse: DocumentTemplate;
 
-    const clientDocument = cloneTemplateWithNewPageIds(
-      DEFAULT_DOCUMENT_TEMPLATE,
-    );
+    if (templateId) {
+      // Use the selected portal template
+      const portalTemplate = await prisma.portalTemplate.findFirst({
+        where: {
+          id: templateId,
+          coachId: coachProfile.id,
+        },
+      });
+
+      if (!portalTemplate) {
+        return NextResponse.json(
+          { success: false, error: "Selected template not found" },
+          { status: 404 },
+        );
+      }
+
+      // Validate the template document structure
+      if (!isValidDocumentTemplate(portalTemplate.document)) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Template document is corrupted or invalid",
+          },
+          { status: 500 },
+        );
+      }
+
+      templateToUse = portalTemplate.document as DocumentTemplate;
+    } else {
+      // Use the default template
+      templateToUse = DEFAULT_DOCUMENT_TEMPLATE;
+    }
+
+    const clientDocument = cloneTemplateWithNewPageIds(templateToUse);
 
     const rawPassword = generateSystemPassword();
     const hashedPassword = await hashPassword(rawPassword);

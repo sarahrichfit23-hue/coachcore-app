@@ -116,3 +116,16 @@ export interface Session {
   isPasswordChanged: boolean;
   avatarUrl?: string;
 }
+
+// Portal Template Types
+export interface PortalTemplate {
+  id: string;
+  name: string;
+  description: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PortalTemplateWithDocument extends PortalTemplate {
+  document: DocumentTemplate;
+}

@@ -11,17 +11,19 @@ import {
   Settings,
   LogOut,
   Menu,
+  FileText,
   type LucideIcon,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Session } from "@/types";
 
-export type NavIconKey = "dashboard" | "messages" | "settings";
+export type NavIconKey = "dashboard" | "messages" | "settings" | "templates";
 
 const ICONS: Record<NavIconKey, LucideIcon> = {
   dashboard: LayoutDashboard,
   messages: MessageSquare,
   settings: Settings,
+  templates: FileText,
 };
 
 export interface NavItem {

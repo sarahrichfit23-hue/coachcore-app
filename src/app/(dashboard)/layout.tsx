@@ -41,6 +41,15 @@ export default function DashboardLayout({
     { name: "Settings", href: "/settings", iconKey: "settings" },
   ];
 
+  // Add Templates navigation item for coaches
+  if (user?.role === "COACH") {
+    navItems.splice(1, 0, {
+      name: "Templates",
+      href: "/coach/templates",
+      iconKey: "templates",
+    });
+  }
+
   // Convert User to Session format
   const userSession = user
     ? {

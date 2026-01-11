@@ -90,10 +90,34 @@ model CoachProfile {
   // Clients managed by this coach
   clients ClientProfile[]
 
+  // Portal templates created by this coach
+  portalTemplates PortalTemplate[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("coach_profiles")
+}
+
+// ===========================================
+// PORTAL TEMPLATE
+// ===========================================
+
+model PortalTemplate {
+  id      String @id @default(cuid())
+  coachId String
+  coach   CoachProfile @relation(fields: [coachId], references: [id], onDelete: Cascade)
+
+  name        String // User-friendly name for the template
+  description String? // Optional description
+  document    Json // Document structure (same format as ClientProfile.document)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([coachId])
+  @@index([coachId, createdAt])
+  @@map("portal_templates")
 }
 
 // ===========================================
