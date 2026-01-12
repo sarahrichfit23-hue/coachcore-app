@@ -23,17 +23,30 @@ export async function uploadToR2(
   body: Buffer | Uint8Array,
   contentType: string,
 ): Promise<string> {
-  const command = new PutObjectCommand({
-    Bucket: R2_BUCKET_NAME,
-    Key: key,
-    Body: body,
-    ContentType: contentType,
-  });
+  try {
+    const command = new PutObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: key,
+      Body: body,
+      ContentType: contentType,
+    });
 
-  await r2Client.send(command);
+    await r2Client.send(command);
 
-  // Return the public URL
-  return `${process.env.R2_PUBLIC_URL}/${key}`;
+    // Return the public URL
+    const publicUrl = `${process.env.R2_PUBLIC_URL}/${key}`;
+    
+    // Log for debugging if R2_PUBLIC_URL is not configured
+    if (!process.env.R2_PUBLIC_URL) {
+      console.error("R2_PUBLIC_URL is not configured in environment variables");
+      throw new Error("R2 storage is not properly configured");
+    }
+    
+    return publicUrl;
+  } catch (error) {
+    console.error("Error uploading to R2:", error);
+    throw new Error("Failed to upload file to storage. Please check R2 configuration and CORS settings.");
+  }
 }
 
 // Delete file from R2
