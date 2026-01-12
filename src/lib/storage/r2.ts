@@ -33,7 +33,8 @@ const isR2Configured = validateR2Config();
 // Use safe defaults if not configured to prevent initialization errors
 export const r2Client = new S3Client({
   region: "auto",
-  endpoint: process.env.R2_ENDPOINT || "https://placeholder.r2.cloudflarestorage.com",
+  endpoint:
+    process.env.R2_ENDPOINT || "https://placeholder.r2.cloudflarestorage.com",
   credentials: {
     accessKeyId: process.env.R2_ACCESS_KEY_ID || "placeholder",
     secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || "placeholder",
@@ -50,7 +51,9 @@ export async function uploadToR2(
 ): Promise<string> {
   // Check if R2 is configured
   if (!isR2Configured) {
-    throw new Error("R2 storage is not properly configured. Please check all R2 environment variables.");
+    throw new Error(
+      "R2 storage is not properly configured. Please check all R2 environment variables.",
+    );
   }
 
   try {
@@ -67,13 +70,15 @@ export async function uploadToR2(
     return `${process.env.R2_PUBLIC_URL}/${key}`;
   } catch (error) {
     console.error("Error uploading to R2:", error);
-    
+
     // Provide specific error message based on error type
     if (error instanceof Error) {
       throw new Error(`Failed to upload file to R2 storage: ${error.message}`);
     }
-    
-    throw new Error("Failed to upload file to storage. Please check R2 configuration and CORS settings.");
+
+    throw new Error(
+      "Failed to upload file to storage. Please check R2 configuration and CORS settings.",
+    );
   }
 }
 
