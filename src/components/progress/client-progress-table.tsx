@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Loader2,
@@ -124,11 +124,23 @@ function UploadBox({
   disabled: boolean;
   onSelect: (file: File) => void;
 }) {
+  const [imageError, setImageError] = useState(false);
+
+  // Reset error state when preview changes
+  useEffect(() => {
+    setImageError(false);
+  }, [preview]);
+
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+    setImageError(false); // Reset error state when selecting a new file
     onSelect(file);
     event.target.value = "";
+  };
+
+  const handleImageError = () => {
+    setImageError(true);
   };
 
   return (
@@ -140,19 +152,28 @@ function UploadBox({
         onChange={handleChange}
         disabled={loading || disabled}
       />
-      {preview ? (
+      {preview && !imageError ? (
         <div className="relative h-full w-full overflow-hidden rounded-xl">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={preview}
             alt={`${label} preview`}
             className="h-full w-full object-cover"
+            onError={handleImageError}
           />
           <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition group-hover:opacity-100">
             <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-gray-900">
               Replace photo
             </span>
           </div>
+        </div>
+      ) : preview && imageError ? (
+        <div className="flex flex-col items-center gap-2 text-gray-700">
+          <ImageOff className="h-6 w-6 text-gray-400" />
+          <div className="text-xs font-medium text-gray-600">
+            Failed to load image
+          </div>
+          <div className="text-xs text-gray-500">Click to upload again</div>
         </div>
       ) : (
         <div className="flex flex-col items-center gap-2 text-gray-700">

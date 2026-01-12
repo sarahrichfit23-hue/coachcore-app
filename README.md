@@ -112,3 +112,71 @@ All pages use the React-Page builder and support text, lists, images, videos, an
 5. **Progress Tracking**: See coach-defined phases; for each phase, upload 3 physique photos using Cloudflare R2 and check off completion.
 6. **Messaging**: Send/receive messages to/from the coach (via polling).
 7. **Logout**: End session securely.
+
+---
+
+## Setup Instructions
+
+### Quick Start
+
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Set up your PostgreSQL database (NeonDB recommended)
+4. Configure Cloudflare R2 storage (see below)
+5. Copy `.env.example` to `.env` and fill in your values
+6. Run database migrations: `npm run prisma:migrate`
+7. Seed the database: `npm run seed`
+8. Start the development server: `npm run dev`
+
+### Cloudflare R2 Configuration
+
+**Important:** To fix the "Failed to load resource: You do not have permission to access the requested resource" error, you must properly configure Cloudflare R2 storage.
+
+See the detailed setup guide: **[docs/R2_SETUP.md](./docs/R2_SETUP.md)**
+
+Key requirements:
+- Enable public access on your R2 bucket
+- Configure CORS to allow your application domain
+- Set up API tokens with read/write permissions
+- Configure environment variables correctly
+
+### Cloudflare R2 CORS Configuration
+
+To allow the application to load images from Cloudflare R2, you need to configure CORS on your R2 bucket:
+
+1. Log in to your Cloudflare dashboard
+2. Navigate to R2 → Your Bucket → Settings
+3. Add the following CORS configuration:
+
+```json
+[
+  {
+    "AllowedOrigins": [
+      "http://localhost:3000",
+      "https://your-production-domain.com"
+    ],
+    "AllowedMethods": ["GET", "PUT", "POST", "DELETE", "HEAD"],
+    "AllowedHeaders": ["*"],
+    "ExposeHeaders": ["ETag"],
+    "MaxAgeSeconds": 3600
+  }
+]
+```
+
+**Important Notes:**
+- Replace `https://your-production-domain.com` with your actual production URL
+- For development, include `http://localhost:3000`
+- For Vercel deployments, also add your Vercel preview URLs (e.g., `https://*.vercel.app`)
+
+### R2 Bucket Public Access
+
+Ensure your R2 bucket has a public domain configured:
+
+1. In Cloudflare R2 dashboard, go to your bucket settings
+2. Under "Public Access", enable "Allow Access" or configure a custom domain
+3. Copy the public URL and set it as `R2_PUBLIC_URL` in your `.env` file
+
+Example:
+```
+R2_PUBLIC_URL=https://pub-xxxxxxxxxxxxx.r2.dev
+```
