@@ -4,6 +4,8 @@ import { verifyAuthToken } from "@/lib/auth/token";
 import { Prisma } from "@prisma/client";
 import { createDocumentTemplateWithIds } from "@/lib/document-template";
 
+export const runtime = "nodejs";
+
 // GET - List all portal templates for the coach
 export async function GET(request: NextRequest) {
   try {

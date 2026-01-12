@@ -5,6 +5,8 @@ import { Prisma } from "@prisma/client";
 import { type DocumentTemplate } from "@/types";
 import { isValidDocumentTemplate } from "@/lib/document-template";
 
+export const runtime = "nodejs";
+
 // GET - Get a specific portal template
 export async function GET(
   request: NextRequest,
