@@ -24,6 +24,12 @@ export async function uploadToR2(
   contentType: string,
 ): Promise<string> {
   try {
+    // Validate R2_PUBLIC_URL is configured before proceeding
+    if (!process.env.R2_PUBLIC_URL) {
+      console.error("R2_PUBLIC_URL is not configured in environment variables");
+      throw new Error("R2 storage is not properly configured");
+    }
+
     const command = new PutObjectCommand({
       Bucket: R2_BUCKET_NAME,
       Key: key,
@@ -35,12 +41,6 @@ export async function uploadToR2(
 
     // Return the public URL
     const publicUrl = `${process.env.R2_PUBLIC_URL}/${key}`;
-    
-    // Log for debugging if R2_PUBLIC_URL is not configured
-    if (!process.env.R2_PUBLIC_URL) {
-      console.error("R2_PUBLIC_URL is not configured in environment variables");
-      throw new Error("R2 storage is not properly configured");
-    }
     
     return publicUrl;
   } catch (error) {

@@ -99,9 +99,17 @@ R2_ACCESS_KEY_ID=your_access_key_id_here
 R2_SECRET_ACCESS_KEY=your_secret_access_key_here
 R2_BUCKET_NAME=coachcore-uploads
 R2_PUBLIC_URL=https://pub-xxxxxxxxxxxxx.r2.dev
+# Optional: Only needed if using a custom domain (without https://)
+R2_CUSTOM_DOMAIN=cdn.yourdomain.com
 ```
 
 **Replace the placeholder values with your actual values from steps 2 and 4.**
+
+**Note about R2_CUSTOM_DOMAIN:**
+- Only set this if you're using a custom domain for your R2 bucket (Option B from Step 2)
+- Use just the hostname without `https://` (e.g., `cdn.yourdomain.com`)
+- This is used for Next.js image optimization security
+- Leave it empty if using the default R2 public domain
 
 ## Step 6: Verify Configuration
 

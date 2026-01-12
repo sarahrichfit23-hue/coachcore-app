@@ -22,8 +22,17 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "**",
+        hostname: "pub-*.r2.dev",
       },
+      // Allow custom R2 domains if configured
+      ...(process.env.R2_CUSTOM_DOMAIN
+        ? [
+            {
+              protocol: "https" as const,
+              hostname: process.env.R2_CUSTOM_DOMAIN,
+            },
+          ]
+        : []),
     ],
   },
 };
