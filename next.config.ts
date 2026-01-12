@@ -1,5 +1,15 @@
 import type { NextConfig } from "next";
 
+// Validate custom domain format
+function isValidDomain(domain: string | undefined): boolean {
+  if (!domain) return false;
+  // Check for valid domain format: alphanumeric, dots, hyphens
+  const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-_.]*[a-zA-Z0-9]$/;
+  // Prevent protocol prefixes and paths
+  if (domain.includes('://') || domain.includes('/')) return false;
+  return domainRegex.test(domain);
+}
+
 const nextConfig: NextConfig = {
   experimental: {
     turbo: {
@@ -26,12 +36,12 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "**.r2.dev",
       },
-      // Allow custom R2 domains if configured
-      ...(process.env.R2_CUSTOM_DOMAIN
+      // Allow custom R2 domains if configured and valid
+      ...(isValidDomain(process.env.R2_CUSTOM_DOMAIN)
         ? [
             {
               protocol: "https" as const,
-              hostname: process.env.R2_CUSTOM_DOMAIN,
+              hostname: process.env.R2_CUSTOM_DOMAIN!,
             },
           ]
         : []),

@@ -5,6 +5,30 @@ import {
   GetObjectCommand,
 } from "@aws-sdk/client-s3";
 
+// Validate R2 configuration on module load
+function validateR2Config() {
+  if (!process.env.R2_PUBLIC_URL) {
+    console.error("R2_PUBLIC_URL is not configured in environment variables");
+    return false;
+  }
+  if (!process.env.R2_ENDPOINT) {
+    console.error("R2_ENDPOINT is not configured in environment variables");
+    return false;
+  }
+  if (!process.env.R2_ACCESS_KEY_ID || !process.env.R2_SECRET_ACCESS_KEY) {
+    console.error("R2 credentials are not configured in environment variables");
+    return false;
+  }
+  if (!process.env.R2_BUCKET_NAME) {
+    console.error("R2_BUCKET_NAME is not configured in environment variables");
+    return false;
+  }
+  return true;
+}
+
+// Check configuration on module load (but don't throw to allow app to start)
+const isR2Configured = validateR2Config();
+
 // Cloudflare R2 Client Configuration
 export const r2Client = new S3Client({
   region: "auto",
@@ -23,10 +47,9 @@ export async function uploadToR2(
   body: Buffer | Uint8Array,
   contentType: string,
 ): Promise<string> {
-  // Validate R2_PUBLIC_URL is configured before proceeding
-  if (!process.env.R2_PUBLIC_URL) {
-    console.error("R2_PUBLIC_URL is not configured in environment variables");
-    throw new Error("R2 storage is not properly configured. Please set R2_PUBLIC_URL in your environment variables.");
+  // Check if R2 is configured
+  if (!isR2Configured) {
+    throw new Error("R2 storage is not properly configured. Please check all R2 environment variables.");
   }
 
   try {

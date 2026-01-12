@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Loader2,
@@ -125,14 +125,10 @@ function UploadBox({
   onSelect: (file: File) => void;
 }) {
   const [imageError, setImageError] = useState(false);
-  const prevPreviewRef = useRef(preview);
 
   // Reset error state when preview changes
   useEffect(() => {
-    if (prevPreviewRef.current !== preview) {
-      prevPreviewRef.current = preview;
-      setImageError(false);
-    }
+    setImageError(false);
   }, [preview]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
