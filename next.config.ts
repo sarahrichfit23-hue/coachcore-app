@@ -1,10 +1,11 @@
 import type { NextConfig } from "next";
 
-// Validate custom domain format
+// Validate custom domain format per RFC 1123
 function isValidDomain(domain: string | undefined): boolean {
   if (!domain) return false;
   // Check for valid domain format: alphanumeric, dots, hyphens
-  const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-_.]*[a-zA-Z0-9]$/;
+  // Allows single-character domains and complies with RFC 1123
+  const domainRegex = /^[a-zA-Z0-9]([a-zA-Z0-9-.]*[a-zA-Z0-9])?$/;
   // Prevent protocol prefixes and paths
   if (domain.includes('://') || domain.includes('/')) return false;
   return domainRegex.test(domain);

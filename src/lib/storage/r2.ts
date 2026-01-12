@@ -30,16 +30,17 @@ function validateR2Config() {
 const isR2Configured = validateR2Config();
 
 // Cloudflare R2 Client Configuration
+// Use safe defaults if not configured to prevent initialization errors
 export const r2Client = new S3Client({
   region: "auto",
-  endpoint: process.env.R2_ENDPOINT!,
+  endpoint: process.env.R2_ENDPOINT || "https://placeholder.r2.cloudflarestorage.com",
   credentials: {
-    accessKeyId: process.env.R2_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+    accessKeyId: process.env.R2_ACCESS_KEY_ID || "placeholder",
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || "placeholder",
   },
 });
 
-export const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME!;
+export const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || "placeholder";
 
 // Upload file to R2
 export async function uploadToR2(
@@ -62,7 +63,7 @@ export async function uploadToR2(
 
     await r2Client.send(command);
 
-    // Return the public URL
+    // Return the public URL (safe to use here as validated above)
     return `${process.env.R2_PUBLIC_URL}/${key}`;
   } catch (error) {
     console.error("Error uploading to R2:", error);
