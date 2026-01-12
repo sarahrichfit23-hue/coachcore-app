@@ -40,9 +40,7 @@ export async function uploadToR2(
     await r2Client.send(command);
 
     // Return the public URL
-    const publicUrl = `${process.env.R2_PUBLIC_URL}/${key}`;
-    
-    return publicUrl;
+    return `${process.env.R2_PUBLIC_URL}/${key}`;
   } catch (error) {
     console.error("Error uploading to R2:", error);
     
