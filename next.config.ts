@@ -20,9 +20,11 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: [
+      // Cloudflare R2 public domains pattern
+      // Note: Next.js supports wildcard subdomains in hostname patterns
       {
         protocol: "https",
-        hostname: "pub-*.r2.dev",
+        hostname: "**.r2.dev",
       },
       // Allow custom R2 domains if configured
       ...(process.env.R2_CUSTOM_DOMAIN

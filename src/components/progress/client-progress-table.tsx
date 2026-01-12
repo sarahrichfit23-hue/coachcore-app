@@ -126,19 +126,23 @@ function UploadBox({
 }) {
   const [imageError, setImageError] = useState(false);
 
+  // Reset error state when preview changes
+  const prevPreviewRef = useState(preview);
+  if (prevPreviewRef[0] !== preview) {
+    prevPreviewRef[0] = preview;
+    setImageError(false);
+  }
+
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+    setImageError(false); // Reset error state when selecting a new file
     onSelect(file);
     event.target.value = "";
   };
 
   const handleImageError = () => {
     setImageError(true);
-  };
-
-  const handleImageLoad = () => {
-    setImageError(false);
   };
 
   return (
@@ -158,7 +162,6 @@ function UploadBox({
             alt={`${label} preview`}
             className="h-full w-full object-cover"
             onError={handleImageError}
-            onLoad={handleImageLoad}
           />
           <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition group-hover:opacity-100">
             <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-gray-900">
