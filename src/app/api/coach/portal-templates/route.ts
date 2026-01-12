@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { verifyAuthToken } from "@/lib/auth/token";
 import { Prisma } from "@prisma/client";
-import { type DocumentTemplate } from "@/types";
-import { isValidDocumentTemplate } from "@/lib/document-template";
+import { createDocumentTemplateWithIds } from "@/lib/document-template";
 
 // GET - List all portal templates for the coach
 export async function GET(request: NextRequest) {
@@ -106,7 +105,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const name = (body?.name as string | undefined)?.trim();
     const description = (body?.description as string | undefined)?.trim();
-    const document = body?.document;
 
     if (!name) {
       return NextResponse.json(
@@ -115,12 +113,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!isValidDocumentTemplate(document)) {
-      return NextResponse.json(
-        { success: false, error: "Valid document template is required" },
-        { status: 400 },
-      );
-    }
+    // Create a fresh document template with new IDs on the server side
+    const document = createDocumentTemplateWithIds();
 
     const template = await prisma.portalTemplate.create({
       data: {
@@ -136,7 +130,7 @@ export async function POST(request: NextRequest) {
       { status: 201 },
     );
   } catch (error) {
-    console.error("Create portal template error", error);
+    console.error("Create portal template error:", error);
     return NextResponse.json(
       { success: false, error: "Unable to create template" },
       { status: 500 },
