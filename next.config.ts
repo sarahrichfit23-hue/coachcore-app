@@ -7,7 +7,7 @@ function isValidDomain(domain: string | undefined): boolean {
   // Allows single-character domains and complies with RFC 1123
   const domainRegex = /^[a-zA-Z0-9]([a-zA-Z0-9-.]*[a-zA-Z0-9])?$/;
   // Prevent protocol prefixes and paths
-  if (domain.includes('://') || domain.includes('/')) return false;
+  if (domain.includes("://") || domain.includes("/")) return false;
   return domainRegex.test(domain);
 }
 
