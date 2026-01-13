@@ -1,26 +1,14 @@
 import { SignJWT, jwtVerify, JWTPayload } from "jose";
 import crypto from "crypto";
+import { supabaseAdmin } from "@/lib/supabase/server";
 
 // SSO tokens are short-lived tokens used for single sign-on between main app and portal
 const SSO_TOKEN_EXPIRY_SECONDS = 60 * 5; // 5 minutes
 
 export interface SsoTokenPayload extends JWTPayload {
   userId: string;
-  tokenId: string; // Reference to in-memory store for one-time use validation
+  tokenId: string;
 }
-
-interface SsoTokenRecord {
-  id: string;
-  token: string;
-  userId: string;
-  expiresAt: Date;
-  used: boolean;
-  returnUrl: string | null;
-  createdAt: Date;
-}
-
-// In-memory token store (for production, consider Redis or similar)
-const tokenStore = new Map<string, SsoTokenRecord>();
 
 function getSecretKey(): Uint8Array {
   const secret = process.env.JWT_SECRET;
@@ -32,31 +20,32 @@ function getSecretKey(): Uint8Array {
 
 /**
  * Generate a short-lived SSO token for portal access
- * @param userId - User ID to generate token for
- * @param returnUrl - Optional URL to return to after SSO login
- * @returns SSO token string and database record ID
+ * Stores token in Supabase database
  */
 export async function generateSsoToken(
   userId: string,
   returnUrl?: string,
 ): Promise<{ token: string; tokenId: string }> {
-  // Generate a unique token ID
   const tokenId = crypto.randomBytes(32).toString("hex");
-  const recordId = crypto.randomBytes(16).toString("hex");
   const expiresAt = new Date(Date.now() + SSO_TOKEN_EXPIRY_SECONDS * 1000);
 
-  // Create in-memory record for tracking and one-time use
-  const record: SsoTokenRecord = {
-    id: recordId,
-    token: tokenId,
-    userId,
-    expiresAt,
-    returnUrl: returnUrl || null,
-    used: false,
-    createdAt: new Date(),
-  };
+  // Store token in Supabase
+  const { data, error } = await supabaseAdmin
+    .from("sso_tokens")
+    .insert({
+      token: tokenId,
+      user_id: userId,
+      expires_at: expiresAt.toISOString(),
+      return_url: returnUrl || null,
+      used: false,
+    })
+    .select()
+    .single();
 
-  tokenStore.set(tokenId, record);
+  if (error) {
+    console.error("Error creating SSO token:", error);
+    throw new Error("Failed to create SSO token");
+  }
 
   // Create JWT with the token ID
   const secret = getSecretKey();
@@ -69,13 +58,11 @@ export async function generateSsoToken(
     .setExpirationTime(`${SSO_TOKEN_EXPIRY_SECONDS}s`)
     .sign(secret);
 
-  return { token: jwt, tokenId: recordId };
+  return { token: jwt, tokenId: data.id };
 }
 
 /**
  * Verify and consume an SSO token (one-time use)
- * @param token - SSO token to verify
- * @returns User ID and return URL if valid, null otherwise
  */
 export async function verifySsoToken(
   token: string,
@@ -88,39 +75,38 @@ export async function verifySsoToken(
       return null;
     }
 
-    // Check in-memory store
-    const record = tokenStore.get(payload.tokenId);
+    // Get token from Supabase
+    const { data: ssoRecord, error } = await supabaseAdmin
+      .from("sso_tokens")
+      .select("*")
+      .eq("token", payload.tokenId)
+      .single();
 
-    if (!record) {
-      console.error("SSO token not found in store");
+    if (error || !ssoRecord) {
+      console.error("SSO token not found in database");
       return null;
     }
 
     // Validate token hasn't been used and hasn't expired
-    if (record.used) {
+    if (ssoRecord.used) {
       console.error("SSO token already used");
       return null;
     }
 
-    if (record.expiresAt < new Date()) {
+    if (new Date(ssoRecord.expires_at) < new Date()) {
       console.error("SSO token expired");
-      // Clean up expired token
-      tokenStore.delete(payload.tokenId);
       return null;
     }
 
     // Mark token as used (one-time use)
-    record.used = true;
-    tokenStore.set(payload.tokenId, record);
-
-    // Schedule cleanup after 1 hour
-    setTimeout(() => {
-      tokenStore.delete(payload.tokenId);
-    }, 60 * 60 * 1000);
+    await supabaseAdmin
+      .from("sso_tokens")
+      .update({ used: true })
+      .eq("id", ssoRecord.id);
 
     return {
-      userId: record.userId,
-      returnUrl: record.returnUrl,
+      userId: ssoRecord.user_id,
+      returnUrl: ssoRecord.return_url,
     };
   } catch (error) {
     console.error("Invalid or expired SSO token", error);
@@ -129,34 +115,32 @@ export async function verifySsoToken(
 }
 
 /**
- * Cleanup expired SSO tokens (can be run periodically)
+ * Cleanup expired SSO tokens
  */
 export async function cleanupExpiredSsoTokens(): Promise<number> {
-  const now = new Date();
-  let count = 0;
+  const now = new Date().toISOString();
+  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
-  for (const [tokenId, record] of tokenStore.entries()) {
-    // Remove expired tokens or used tokens older than 24 hours
-    if (
-      record.expiresAt < now ||
-      (record.used &&
-        record.createdAt.getTime() < now.getTime() - 24 * 60 * 60 * 1000)
-    ) {
-      tokenStore.delete(tokenId);
-      count++;
-    }
+  // Delete expired tokens or used tokens older than 24 hours
+  const { data, error } = await supabaseAdmin
+    .from("sso_tokens")
+    .delete()
+    .or(`expires_at.lt.${now},and(used.eq.true,created_at.lt.${oneDayAgo})`)
+    .select();
+
+  if (error) {
+    console.error("Error cleaning up SSO tokens:", error);
+    return 0;
   }
 
-  return count;
+  return data?.length || 0;
 }
 
 /**
  * Get the cookie domain for SSO
- * Returns the configured domain or undefined for same-origin
  */
 export function getSsoCookieDomain(): string | undefined {
   const domain = process.env.SSO_COOKIE_DOMAIN;
-  // Only return domain if it's set and we're not in development without a domain
   if (domain && domain.trim() !== "") {
     return domain.trim();
   }
@@ -176,4 +160,5 @@ export function getPortalUrl(): string {
 export function getAppUrl(): string {
   return process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 }
+
 
