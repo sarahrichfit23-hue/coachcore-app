@@ -9,77 +9,96 @@ The SSO implementation allows coaches to access the portal without re-entering c
 - JWT-based authentication
 - Shared HTTP-only cookies for cross-subdomain support
 - One-time use tokens for security
-- **In-memory token storage** (no database required for SSO tokens)
+- **Supabase database storage** for token tracking
 
 ## Architecture
 
 ```
-Main App (app.coachcore.com)
+Main App (mycoachcore.com)
     ↓
-  Generate SSO Token (stored in memory)
+  Generate SSO Token (stored in Supabase)
     ↓
   Redirect to Portal with Token
     ↓
-Portal (portal.coachcore.com)
+Portal (portal.mycoachcore.com)
     ↓
-  Verify SSO Token (check memory store)
+  Verify SSO Token (check Supabase)
     ↓
-  Create Session Cookie
+  Create Session Cookie (domain: .mycoachcore.com)
     ↓
   Redirect to Portal Dashboard
 ```
 
 ## Setup Instructions
 
-### Option A: Same Domain (Development)
+### Production Setup (mycoachcore.com)
 
-For local development where both apps run on `localhost`:
+For your production deployment at **mycoachcore.com** with portal at **portal.mycoachcore.com**:
 
-1. **Environment Variables** (`.env`):
+1. **Environment Variables** (`.env` or Vercel Environment Variables):
 ```bash
-# Main app runs on port 3000
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-# Portal runs on port 3001 (or same app with /portal routes)
-NEXT_PUBLIC_PORTAL_URL=http://localhost:3001
-# Leave SSO_COOKIE_DOMAIN empty for localhost
-SSO_COOKIE_DOMAIN=
-JWT_SECRET=your-secure-secret-here
+# Production URLs
+NEXT_PUBLIC_APP_URL=https://mycoachcore.com
+NEXT_PUBLIC_PORTAL_URL=https://portal.mycoachcore.com
+
+# Root domain for cookie sharing (note the leading dot)
+SSO_COOKIE_DOMAIN=.mycoachcore.com
+
+# JWT Secret (generate: openssl rand -base64 32)
+JWT_SECRET=your-secure-production-secret
+
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+
+NODE_ENV=production
 ```
 
-2. **Start Both Apps**:
+2. **DNS Configuration**:
+   - Main app: `mycoachcore.com` → Your Vercel deployment
+   - Portal: `portal.mycoachcore.com` → Your Vercel deployment (or separate)
+   - Ensure SSL certificates are valid for both domains
+
+3. **Vercel Deployment**:
+
+**Option A: Same Deployment (Recommended)**
+- Deploy once to Vercel
+- Add both domains in Vercel: Settings → Domains
+  - Add `mycoachcore.com`
+  - Add `portal.mycoachcore.com`
+- The same codebase serves both domains with different routes
+
+**Option B: Separate Deployments**
+- Deploy main app to `mycoachcore.com`
+- Deploy portal code to `portal.mycoachcore.com`
+- Ensure both have the same `JWT_SECRET` and `SSO_COOKIE_DOMAIN`
+
+### Local Development Setup
+
+For testing locally before deploying:
+
+1. **Environment Variables** (`.env.local`):
+```bash
+# Local development URLs
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_PORTAL_URL=http://localhost:3001
+
+# Leave empty for localhost (no cross-domain)
+SSO_COOKIE_DOMAIN=
+
+JWT_SECRET=development-secret-change-in-production
+NODE_ENV=development
+```
+
+2. **Start Apps**:
 ```bash
 # Terminal 1 - Main App
 npm run dev
 
-# Terminal 2 - Portal (if separate deployment)
-cd ../portal
+# Terminal 2 - Portal (if separate, otherwise same app handles both)
 PORT=3001 npm run dev
-
-# OR: Use same codebase for both (recommended)
-# Portal routes are already included in this app
-npm run dev
 ```
-
-### Option B: Subdomains (Production)
-
-For production with subdomains like `app.coachcore.com` and `portal.coachcore.com`:
-
-1. **Environment Variables** (`.env`):
-```bash
-NEXT_PUBLIC_APP_URL=https://app.coachcore.com
-NEXT_PUBLIC_PORTAL_URL=https://portal.coachcore.com
-# Root domain for cookie sharing
-SSO_COOKIE_DOMAIN=.coachcore.com
-JWT_SECRET=your-secure-production-secret
-```
-
-2. **DNS Configuration**:
-   - Set up A/CNAME records for both subdomains pointing to your hosting
-   - Ensure SSL certificates are valid for both subdomains
-
-3. **Deploy Both Apps**:
-   - Deploy main app to `app.coachcore.com`
-   - Deploy portal to `portal.coachcore.com` (or use same deployment with routing)
 
 ## Token Storage
 
