@@ -128,6 +128,18 @@ All pages use the React-Page builder and support text, lists, images, videos, an
 7. Seed the database: `npm run seed`
 8. Start the development server: `npm run dev`
 
+### Single Sign-On (SSO) Setup
+
+This application supports Single Sign-On between the main app and Coach Portal, allowing coaches to access the portal without re-entering credentials.
+
+See the detailed setup guide: **[docs/SSO_SETUP.md](./docs/SSO_SETUP.md)**
+
+Key features:
+- One-click portal access from coach dashboard
+- Shared authentication across subdomains
+- Secure, short-lived SSO tokens
+- Works in both development and production
+
 ### Cloudflare R2 Configuration
 
 **Important:** To fix the "Failed to load resource: You do not have permission to access the requested resource" error, you must properly configure Cloudflare R2 storage.

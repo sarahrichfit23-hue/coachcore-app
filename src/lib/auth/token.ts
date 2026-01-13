@@ -62,28 +62,60 @@ export async function verifyAuthToken(
   }
 }
 
-export function buildAuthCookie(token: string) {
-  return {
+export function buildAuthCookie(token: string, options?: { domain?: string }) {
+  const cookieOptions: {
+    name: string;
+    value: string;
+    httpOnly: boolean;
+    secure: boolean;
+    sameSite: "lax" | "strict" | "none";
+    path: string;
+    maxAge: number;
+    domain?: string;
+  } = {
     name: AUTH_COOKIE_NAME,
     value: token,
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax" as const,
+    sameSite: "lax",
     path: "/",
     maxAge: TOKEN_EXPIRY_SECONDS,
   };
+
+  // Add domain if provided (for cross-subdomain SSO)
+  if (options?.domain) {
+    cookieOptions.domain = options.domain;
+  }
+
+  return cookieOptions;
 }
 
-export function clearAuthCookie() {
-  return {
+export function clearAuthCookie(options?: { domain?: string }) {
+  const cookieOptions: {
+    name: string;
+    value: string;
+    httpOnly: boolean;
+    secure: boolean;
+    sameSite: "lax" | "strict" | "none";
+    path: string;
+    maxAge: number;
+    domain?: string;
+  } = {
     name: AUTH_COOKIE_NAME,
     value: "",
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax" as const,
+    sameSite: "lax",
     path: "/",
     maxAge: 0,
   };
+
+  // Add domain if provided (for cross-subdomain SSO)
+  if (options?.domain) {
+    cookieOptions.domain = options.domain;
+  }
+
+  return cookieOptions;
 }
 
 /**

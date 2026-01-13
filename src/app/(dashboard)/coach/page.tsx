@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AddClientDialog } from "@/components/dashboard/coach/add-client-dialog";
+import { PortalAccessButton } from "@/components/dashboard/coach/portal-access-button";
 import {
   coachClientProgressKey,
   coachClientsQueryKey,
@@ -277,11 +278,14 @@ export default function CoachDashboardPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="mb-2 text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600">
-          Welcome back! Here&apos;s an overview of your coaching practice.
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="mb-2 text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-gray-600">
+            Welcome back! Here&apos;s an overview of your coaching practice.
+          </p>
+        </div>
+        <PortalAccessButton />
       </div>
 
       {/* Stats Cards */}
