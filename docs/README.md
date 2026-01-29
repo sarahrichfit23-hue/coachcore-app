@@ -162,7 +162,7 @@ Your schema includes:
 
 If you encounter issues:
 
-1. Check the [FAQ in PRISMA_DEPLOYMENT_GUIDE.md](./PRISMA_DEPLOYMENT_GUIDE.md#-faq)
+1. Check the [FAQ in PRISMA_DEPLOYMENT_GUIDE.md](./PRISMA_DEPLOYMENT_GUIDE.md#faq)
 2. Review [Prisma documentation](https://www.prisma.io/docs)
 3. Check [Supabase + Prisma integration guide](https://supabase.com/docs/guides/integrations/prisma)
 
