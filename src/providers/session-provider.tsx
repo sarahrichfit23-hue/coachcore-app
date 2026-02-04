@@ -78,7 +78,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, [pathname]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only fetch once on mount and when explicitly called via refetch
 
   const handleLogout = () => {
     setUser(null);
