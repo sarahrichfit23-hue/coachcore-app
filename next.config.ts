@@ -12,12 +12,13 @@ function isValidDomain(domain: string | undefined): boolean {
 }
 
 const nextConfig: NextConfig = {
-  experimental: {
-    turbo: {
-      resolveAlias: {
-        "react/jsx-runtime.js": "react/jsx-runtime",
-        "react/jsx-dev-runtime.js": "react/jsx-dev-runtime",
-      },
+  // Ensure Next.js traces files from the project root (avoid stray lockfile confusion)
+  outputFileTracingRoot: process.cwd(),
+  // Use new Turbopack config key (experimental.turbo is deprecated)
+  turbopack: {
+    resolveAlias: {
+      "react/jsx-runtime.js": "react/jsx-runtime",
+      "react/jsx-dev-runtime.js": "react/jsx-dev-runtime",
     },
   },
   webpack: (config) => {
