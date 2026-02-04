@@ -4,7 +4,7 @@
 
 This project is a web-based platform designed to streamline the relationship between coaches and their clients, focusing on personalized fitness or coaching programs. The core functionality revolves around coaches creating customizable document templates (e.g., introduction, onboarding, and workout planners) using a drag-and-drop builder. Coaches can onboard clients by inputting personal details and tailoring these templates, including creating multi-phase workout plans with drag-and-drop interfaces. Once onboarded, clients receive access to view their personalized documents, track progress through photo uploads and checkboxes, and communicate with the coach. The system includes a coach dashboard for managing multiple clients, viewing progress, and handling messages. An admin role is included for system oversight, such as managing users, resolving inquiries, and monitoring platform health.
 
-The platform is built as a Minimum Viable Product (MVP) with investor-ready polish, emphasizing rapid development (≤2 weeks) without over-engineering for edge cases. It supports multi-tenancy with secure data isolation between coaches and clients. Key emphases include user-friendly interfaces, polled messaging, and secure file uploads for progress tracking. Note: Email notifications are omitted for this MVP; client access can be handled manually (e.g., via shared credentials or direct invite links).
+The platform is built as a Minimum Viable Product (MVP) with investor-ready polish, emphasizing rapid development (≤2 weeks) without over-engineering for edge cases. It supports multi-tenancy with secure data isolation between coaches and clients. Key emphases include user-friendly interfaces and secure file uploads for progress tracking. Email notifications are delivered via Resend.
 
 ## Technology Stack
 
@@ -30,8 +30,8 @@ The platform is built as a Minimum Viable Product (MVP) with investor-ready poli
 ### Other Services
 
 - **File Storage**: Cloudflare R2 (for physique photo uploads)
-- **Messaging**: Polling (client-side periodic fetches for messages instead of real-time)
-- **Deployment**: Vercel (for frontend and API) + Hosted PostgreSQL (e.g., managed via pgAdmin4)
+- **Email**: Resend (transactional emails) with SMTP fallback
+- **Deployment**: Vercel (for frontend and API) + Hosted PostgreSQL (Supabase recommended)
 
 - bcrypt
 - dayjs
@@ -43,7 +43,7 @@ The platform is built as a Minimum Viable Product (MVP) with investor-ready poli
 - **Client Onboarding**: Input client details (e.g., name, email), duplicate and personalize templates via a stepper, edit each page/section (e.g., add client info to Intake Questionnaire, personalize Fitness & Nutrition Program), define number of phases for progress tracking (e.g., 3 phases for photo uploads).
 - **Personalized Document Viewing**: Clients view read-only versions of their customized documents and plans.
 - **Progress Tracking**: Clients upload 3 physique photos per phase (based on coach-defined phases) and check off completions; coaches view progress on dashboards.
-- **Messaging**: Chat between coach and client via polling; coaches can also message admins for support.
+- **Notifications**: Email notifications via Resend; in-app chat is not used.
 - **Coach Dashboard**: Overview of all clients with options to edit personalized documents, view progress trackers, and access messages.
 - **Admin Oversight**: Basic admin panel for user management (e.g., onboarding coaches with name/email and generated password), inquiry resolution, and system monitoring.
 - **Security**: Role-based access and secure file handling.
@@ -123,10 +123,31 @@ All pages use the React-Page builder and support text, lists, images, videos, an
 2. Install dependencies: `npm install`
 3. Set up your PostgreSQL database (Supabase recommended)
 4. Configure Cloudflare R2 storage (see below)
-5. Copy `.env.example` to `.env` and fill in your values
-6. **Deploy database schema**: `npx prisma db push` (see [Prisma Deployment Guide](./docs/PRISMA_DEPLOYMENT_GUIDE.md))
+5. Create a `.env` file and add your environment variables (see Required Environment Variables below)
+6. **Deploy database schema**: `npm run prisma:push` (see [Prisma Deployment Guide](./docs/PRISMA_DEPLOYMENT_GUIDE.md))
 7. Seed the database: `npm run seed`
 8. Start the development server: `npm run dev`
+
+### Required Environment Variables
+
+Add these in a local `.env` and in Vercel project settings:
+
+- **Auth**
+  - `JWT_SECRET`: Random string used to sign session JWTs
+
+- **Database (Supabase/Postgres)**
+  - `DATABASE_URL`: Postgres connection string (include `?sslmode=require` when needed)
+
+- **Email (Resend preferred)**
+  - `RESEND_API_KEY`: Resend API key
+  - `EMAIL_FROM`: Verified sender (e.g., `noreply@yourdomain.com`)
+  - `PLATFORM_NAME`: Display name used in templates
+
+- **Email (SMTP fallback)**
+  - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`: SMTP server details
+
+- **Cloudflare R2**
+  - `R2_PUBLIC_URL`, `R2_ENDPOINT`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`
 
 ### Database Setup
 

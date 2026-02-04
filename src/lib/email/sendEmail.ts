@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
 export type EmailConfig = {
   host: string;
@@ -68,6 +69,38 @@ export async function sendEmail({
   html,
   config,
 }: SendEmailParams): Promise<Result> {
+  // Resolve the "from" address either from explicit config or env
+  const fromAddress = config?.from ?? process.env.EMAIL_FROM;
+  if (!fromAddress) {
+    return { success: false, error: "EMAIL_FROM is not set" };
+  }
+
+  // Prefer Resend if RESEND_API_KEY is configured
+  const RESEND_API_KEY = process.env.RESEND_API_KEY;
+  if (RESEND_API_KEY) {
+    try {
+      const resend = new Resend(RESEND_API_KEY);
+      const result = await resend.emails.send({
+        from: fromAddress,
+        to,
+        subject,
+        html,
+      });
+
+      if (result?.error) {
+        console.error("Resend error:", result.error);
+        // Fall through to SMTP fallback below
+      } else {
+        console.log(`Resend email sent to ${to} with subject "${subject}"`);
+        return { success: true, data: undefined };
+      }
+    } catch (error) {
+      console.error("Resend send failed, falling back to SMTP", error);
+      // Fall back to SMTP below
+    }
+  }
+
+  // SMTP fallback (explicit config takes precedence)
   const resolvedConfig: Result<EmailConfig> = config
     ? { success: true, data: config }
     : getEmailConfig();
@@ -75,8 +108,7 @@ export async function sendEmail({
     return { success: false, error: resolvedConfig.error };
   }
 
-  const { host, port, user, pass, from } = resolvedConfig.data;
-
+  const { host, port, user, pass } = resolvedConfig.data;
   try {
     const transporter = nodemailer.createTransport({
       host,
@@ -85,11 +117,11 @@ export async function sendEmail({
       auth: { user, pass },
     });
 
-    await transporter.sendMail({ from, to, subject, html });
-    console.log(`Email sent to ${to} with subject "${subject}"`);
+    await transporter.sendMail({ from: fromAddress, to, subject, html });
+    console.log(`SMTP email sent to ${to} with subject "${subject}"`);
     return { success: true, data: undefined };
   } catch (error) {
-    console.error("Failed to send email", error);
+    console.error("Failed to send email via SMTP", error);
     return { success: false, error: "Failed to send email" };
   }
 }
