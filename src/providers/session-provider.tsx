@@ -76,7 +76,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         } catch {
           // If JSON parsing fails, use default message
         }
-        
+
         console.error("Session fetch failed:", response.status, errorMessage);
         setError(errorMessage);
         return;

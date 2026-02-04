@@ -65,7 +65,12 @@ export async function POST(request: NextRequest) {
     const role = toAppRole(user.role);
 
     if (!role) {
-      console.error("User has unsupported role:", user.role, "for user:", email);
+      console.error(
+        "User has unsupported role:",
+        user.role,
+        "for user:",
+        email,
+      );
       return NextResponse.json(
         { success: false, error: "User role is not supported" },
         { status: 403 },

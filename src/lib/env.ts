@@ -4,10 +4,7 @@
  * Prevents silent failures due to missing configuration
  */
 
-const REQUIRED_ENV_VARS = [
-  "JWT_SECRET",
-  "DATABASE_URL",
-] as const;
+const REQUIRED_ENV_VARS = ["JWT_SECRET", "DATABASE_URL"] as const;
 
 const REQUIRED_PRODUCTION_ENV_VARS = [
   "R2_ENDPOINT",
@@ -57,7 +54,10 @@ export function validateEnvVars(): ValidationResult {
   // Additional validation for DATABASE_URL
   if (process.env.DATABASE_URL) {
     const dbUrl = process.env.DATABASE_URL;
-    if (!dbUrl.startsWith("postgresql://") && !dbUrl.startsWith("postgres://")) {
+    if (
+      !dbUrl.startsWith("postgresql://") &&
+      !dbUrl.startsWith("postgres://")
+    ) {
       errors.push(
         "DATABASE_URL must be a valid PostgreSQL connection string starting with postgresql:// or postgres://",
       );

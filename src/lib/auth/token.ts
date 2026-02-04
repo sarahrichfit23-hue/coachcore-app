@@ -39,7 +39,7 @@ export async function verifyAuthToken(
   try {
     const secret = getSecretKey();
     const { payload } = await jwtVerify<AuthTokenPayload>(token, secret);
-    
+
     // Validate required fields in payload
     if (
       !payload.userId ||

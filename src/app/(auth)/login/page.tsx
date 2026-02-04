@@ -71,14 +71,14 @@ export default function LoginPage() {
     },
     onSuccess: async ({ role, isPasswordChanged }) => {
       setError("");
-      
+
       // Refetch session and wait for it to complete
       await refetchSession();
-      
+
       // Invalidate all queries and wait for completion
       // This ensures the session is properly synced before redirect
       await queryClient.invalidateQueries();
-      
+
       const redirectPath = getPostLoginRedirect(role, isPasswordChanged);
       router.push(redirectPath);
     },

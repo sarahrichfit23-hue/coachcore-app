@@ -14,10 +14,11 @@ function validateEnvironment() {
     errors.push("DATABASE_URL is not defined");
   } else {
     const dbUrl = process.env.DATABASE_URL;
-    if (!dbUrl.startsWith("postgresql://") && !dbUrl.startsWith("postgres://")) {
-      errors.push(
-        "DATABASE_URL must be a valid PostgreSQL connection string",
-      );
+    if (
+      !dbUrl.startsWith("postgresql://") &&
+      !dbUrl.startsWith("postgres://")
+    ) {
+      errors.push("DATABASE_URL must be a valid PostgreSQL connection string");
     }
   }
 
