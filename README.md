@@ -121,12 +121,18 @@ All pages use the React-Page builder and support text, lists, images, videos, an
 
 1. Clone the repository
 2. Install dependencies: `npm install`
-3. Set up your PostgreSQL database (NeonDB recommended)
+3. Set up your PostgreSQL database (Supabase recommended)
 4. Configure Cloudflare R2 storage (see below)
 5. Copy `.env.example` to `.env` and fill in your values
-6. Run database migrations: `npm run prisma:migrate`
+6. **Deploy database schema**: `npx prisma db push` (see [Prisma Deployment Guide](./docs/PRISMA_DEPLOYMENT_GUIDE.md))
 7. Seed the database: `npm run seed`
 8. Start the development server: `npm run dev`
+
+### Database Setup
+
+For detailed instructions on deploying your Prisma schema to Supabase:
+- **Quick Start**: [docs/PRISMA_QUICK_START.md](./docs/PRISMA_QUICK_START.md) - TL;DR version
+- **Complete Guide**: [docs/PRISMA_DEPLOYMENT_GUIDE.md](./docs/PRISMA_DEPLOYMENT_GUIDE.md) - Full documentation
 
 ### Cloudflare R2 Configuration
 

@@ -15,7 +15,7 @@
     "prisma:push": "prisma db push",
     "prisma:studio": "prisma studio",
     "prisma:migrate": "prisma migrate dev",
-    "seed": "pnpm prisma db seed",
+    "seed": "prisma db seed",
     "typecheck": "tsc --noEmit"
   },
   "prisma": {
