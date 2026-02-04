@@ -24,7 +24,26 @@ function isProtectedPath(pathname: string): boolean {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("token")?.value;
-  const session = token ? await verifyAuthToken(token) : null;
+  
+  // Verify token with timeout protection
+  let session = null;
+  if (token) {
+    try {
+      // Add a timeout to prevent middleware from hanging
+      const timeoutPromise = new Promise<null>((resolve) =>
+        setTimeout(() => {
+          console.warn("Token verification timeout in middleware for:", pathname);
+          resolve(null);
+        }, 5000),
+      ); // 5 second timeout
+      
+      const verifyPromise = verifyAuthToken(token);
+      session = await Promise.race([verifyPromise, timeoutPromise]);
+    } catch (error) {
+      console.error("Token verification error in middleware:", error);
+      session = null;
+    }
+  }
 
   const protectedRoute = isProtectedPath(pathname);
 
