@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
   ReactNode,
 } from "react";
@@ -38,6 +39,12 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const pathname = usePathname();
+  const pathnameRef = useRef(pathname);
+
+  // Keep the ref in sync with the latest pathname
+  useEffect(() => {
+    pathnameRef.current = pathname;
+  }, [pathname]);
 
   const fetchUser = useCallback(async () => {
     try {
@@ -50,7 +57,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
       if (!response.ok) {
         // On public pages, 401 is expected and not an error
-        const isPublicPage = PUBLIC_PAGES.includes(pathname);
+        const isPublicPage = PUBLIC_PAGES.includes(pathnameRef.current);
 
         if (response.status === 401) {
           if (!isPublicPage) {
@@ -78,8 +85,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only fetch once on mount and when explicitly called via refetch
+  }, []); // Stable callback that uses pathnameRef for latest value
 
   const handleLogout = () => {
     setUser(null);
