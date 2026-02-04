@@ -88,7 +88,12 @@ export default function LoginPage() {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    await loginMutation.mutateAsync({ email, password });
+    try {
+      await loginMutation.mutateAsync({ email, password });
+    } catch {
+      // Error is already handled by onError callback
+      // This catch prevents unhandled promise rejection
+    }
   };
 
   return (
