@@ -71,8 +71,25 @@ export default function LoginPage() {
     },
     onSuccess: async ({ role, isPasswordChanged }) => {
       setError("");
+
+      // Refetch session and wait for it to complete
       await refetchSession();
-      queryClient.invalidateQueries();
+
+      // Invalidate session-related queries specifically
+      // This is more targeted than invalidating all queries
+      await queryClient.invalidateQueries({
+        predicate: (query) => {
+          // Invalidate queries that depend on authentication state
+          const key = query.queryKey[0];
+          return (
+            typeof key === "string" &&
+            (key.includes("session") ||
+              key.includes("user") ||
+              key.includes("me"))
+          );
+        },
+      });
+
       const redirectPath = getPostLoginRedirect(role, isPasswordChanged);
       router.push(redirectPath);
     },

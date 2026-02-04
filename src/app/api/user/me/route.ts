@@ -51,9 +51,24 @@ export async function GET() {
       );
     }
 
-    const user = await getUserWithCache(session.userId);
+    let user;
+    try {
+      user = await getUserWithCache(session.userId);
+    } catch (dbError) {
+      console.error("Database error fetching user:", dbError);
+      return NextResponse.json(
+        { success: false, error: "Database connection error" },
+        { status: 503 },
+      );
+    }
 
     if (!user || !user.isActive) {
+      console.warn(
+        "User not found or inactive:",
+        session.userId,
+        "active:",
+        user?.isActive,
+      );
       return NextResponse.json(
         { success: false, error: "User not found or inactive" },
         { status: 401 },

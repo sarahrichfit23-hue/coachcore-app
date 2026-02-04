@@ -61,26 +61,41 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
         if (response.status === 401) {
           if (!isPublicPage) {
-            console.warn("Session fetch failed:", response.status);
+            console.warn("Session fetch failed: Unauthorized");
             setError("Session expired");
           }
           setUser(null);
           return;
         }
 
-        // For other errors, just set the error state
-        const errorData = await response.json();
-        setError(errorData.message || "Failed to fetch session");
+        // For other errors, try to get error message
+        let errorMessage = "Failed to fetch session";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch {
+          // If JSON parsing fails, use default message
+        }
+
+        console.error("Session fetch failed:", response.status, errorMessage);
+        setError(errorMessage);
         return;
       }
 
       const data = await response.json();
       if (data.success && data.data) {
         setUser(data.data);
+      } else {
+        console.warn("Session fetch returned invalid data:", data);
+        setError("Invalid session data received");
+        setUser(null);
       }
     } catch (err) {
-      console.error("Error fetching user session:", err);
-      setError("Failed to fetch user session");
+      // Network errors or unexpected failures
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to fetch user session";
+      console.error("Error fetching user session:", errorMessage, err);
+      setError(errorMessage);
       setUser(null);
     } finally {
       setLoading(false);

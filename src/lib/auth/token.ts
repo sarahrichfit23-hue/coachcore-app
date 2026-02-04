@@ -39,6 +39,8 @@ export async function verifyAuthToken(
   try {
     const secret = getSecretKey();
     const { payload } = await jwtVerify<AuthTokenPayload>(token, secret);
+
+    // Validate required fields in payload
     if (
       !payload.userId ||
       (payload.role !== "ADMIN" &&
@@ -46,6 +48,11 @@ export async function verifyAuthToken(
         payload.role !== "CLIENT") ||
       typeof payload.isPasswordChanged !== "boolean"
     ) {
+      console.warn("Invalid token payload structure:", {
+        hasUserId: !!payload.userId,
+        role: payload.role,
+        hasIsPasswordChanged: typeof payload.isPasswordChanged === "boolean",
+      });
       return null;
     }
 
@@ -57,17 +64,38 @@ export async function verifyAuthToken(
       email: payload.email,
     };
   } catch (error) {
-    console.error("Invalid or expired token", error);
+    // Log detailed error information for debugging
+    if (error instanceof Error) {
+      // Don't log the full token for security reasons
+      const tokenPreview = token.substring(0, 20) + "...";
+      console.error("Token verification failed:", {
+        message: error.message,
+        tokenPreview,
+        error: error.name,
+      });
+    } else {
+      console.error("Token verification failed with unknown error:", error);
+    }
     return null;
   }
 }
 
 export function buildAuthCookie(token: string) {
+  // Determine if we should use secure cookies
+  // In production, always use secure unless explicitly disabled
+  // This handles both direct HTTPS and reverse proxy scenarios (like Vercel)
+  const isProduction = process.env.NODE_ENV === "production";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
+  const isHttps = appUrl.startsWith("https://");
+
   return {
     name: AUTH_COOKIE_NAME,
     value: token,
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    // Use secure cookies in production or when explicitly using HTTPS
+    secure: isProduction || isHttps,
+    // Use 'lax' for better compatibility while maintaining security
+    // This allows cookies to be sent on same-site navigations and top-level GET requests
     sameSite: "lax" as const,
     path: "/",
     maxAge: TOKEN_EXPIRY_SECONDS,
@@ -75,11 +103,15 @@ export function buildAuthCookie(token: string) {
 }
 
 export function clearAuthCookie() {
+  const isProduction = process.env.NODE_ENV === "production";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
+  const isHttps = appUrl.startsWith("https://");
+
   return {
     name: AUTH_COOKIE_NAME,
     value: "",
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: isProduction || isHttps,
     sameSite: "lax" as const,
     path: "/",
     maxAge: 0,

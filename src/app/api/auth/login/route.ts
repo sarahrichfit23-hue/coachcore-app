@@ -22,15 +22,30 @@ export async function POST(request: NextRequest) {
     const password = body?.password as string | undefined;
 
     if (!email || !password) {
+      console.warn("Login attempt with missing credentials");
       return NextResponse.json(
         { success: false, error: "Email and password are required" },
         { status: 400 },
       );
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    // Find user by email
+    let user;
+    try {
+      user = await prisma.user.findUnique({ where: { email } });
+    } catch (dbError) {
+      console.error("Database error during login:", dbError);
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Database connection error. Please try again.",
+        },
+        { status: 503 },
+      );
+    }
 
     if (!user || !user.isActive) {
+      console.warn("Login attempt for invalid/inactive user:", email);
       return NextResponse.json(
         { success: false, error: "Invalid credentials" },
         { status: 401 },
@@ -40,6 +55,7 @@ export async function POST(request: NextRequest) {
     const validPassword = await verifyPassword(password, user.password);
 
     if (!validPassword) {
+      console.warn("Login attempt with invalid password for user:", email);
       return NextResponse.json(
         { success: false, error: "Invalid credentials" },
         { status: 401 },
@@ -49,20 +65,36 @@ export async function POST(request: NextRequest) {
     const role = toAppRole(user.role);
 
     if (!role) {
+      console.error(
+        "User has unsupported role:",
+        user.role,
+        "for user:",
+        email,
+      );
       return NextResponse.json(
         { success: false, error: "User role is not supported" },
         { status: 403 },
       );
     }
 
-    const token = await signAuthToken({
-      userId: user.id,
-      role,
-      isPasswordChanged: user.isPasswordChanged,
-      name: user.name,
-      email: user.email,
-      avatarUrl: user.avatarUrl,
-    });
+    // Sign JWT token
+    let token;
+    try {
+      token = await signAuthToken({
+        userId: user.id,
+        role,
+        isPasswordChanged: user.isPasswordChanged,
+        name: user.name,
+        email: user.email,
+        avatarUrl: user.avatarUrl,
+      });
+    } catch (tokenError) {
+      console.error("Failed to sign auth token:", tokenError);
+      return NextResponse.json(
+        { success: false, error: "Authentication token generation failed" },
+        { status: 500 },
+      );
+    }
 
     const response = NextResponse.json({
       success: true,
@@ -75,9 +107,11 @@ export async function POST(request: NextRequest) {
 
     response.cookies.set(buildAuthCookie(token));
 
+    console.log("Successful login for user:", email, "role:", role);
+
     return response;
   } catch (error) {
-    console.error("Login failed", error);
+    console.error("Login failed with unexpected error:", error);
     return NextResponse.json(
       { success: false, error: "Unable to login" },
       { status: 500 },
