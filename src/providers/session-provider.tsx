@@ -5,9 +5,11 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
   ReactNode,
 } from "react";
+import { usePathname } from "next/navigation";
 
 export interface User {
   id: string;
@@ -29,10 +31,20 @@ interface SessionContextType {
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
+// Public pages that don't require authentication
+const PUBLIC_PAGES = ["/login", "/", "/404"];
+
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const pathname = usePathname();
+  const pathnameRef = useRef(pathname);
+
+  // Keep the ref in sync with the latest pathname
+  useEffect(() => {
+    pathnameRef.current = pathname;
+  }, [pathname]);
 
   const fetchUser = useCallback(async () => {
     try {
@@ -44,13 +56,15 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       });
 
       if (!response.ok) {
-        console.warn("Session fetch failed:", response.status);
-        setUser(null);
+        // On public pages, 401 is expected and not an error
+        const isPublicPage = PUBLIC_PAGES.includes(pathnameRef.current);
 
-        // Don't redirect here - let middleware handle it
-        // The middleware will catch the invalid session and redirect
         if (response.status === 401) {
-          setError("Session expired");
+          if (!isPublicPage) {
+            console.warn("Session fetch failed:", response.status);
+            setError("Session expired");
+          }
+          setUser(null);
           return;
         }
 
@@ -71,7 +85,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, []); // Remove router dependency since we're using window.location.href
+  }, []); // Stable callback that uses pathnameRef for latest value
 
   const handleLogout = () => {
     setUser(null);
