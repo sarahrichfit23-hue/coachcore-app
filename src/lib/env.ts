@@ -14,6 +14,11 @@ const REQUIRED_PRODUCTION_ENV_VARS = [
   "R2_PUBLIC_URL",
 ] as const;
 
+// Constants for validation
+const MIN_JWT_SECRET_LENGTH = 32;
+const PLACEHOLDER_SECRETS = ["your_hex_secret_here", "changeme"];
+const VALID_DB_PROTOCOLS = ["postgresql://", "postgres://"];
+
 interface ValidationResult {
   success: boolean;
   missing: string[];
@@ -39,12 +44,12 @@ export function validateEnvVars(): ValidationResult {
   // Additional validation for JWT_SECRET
   if (process.env.JWT_SECRET) {
     const secret = process.env.JWT_SECRET;
-    if (secret.length < 32) {
+    if (secret.length < MIN_JWT_SECRET_LENGTH) {
       errors.push(
-        "JWT_SECRET must be at least 32 characters long. Generate one with: openssl rand -hex 32",
+        `JWT_SECRET must be at least ${MIN_JWT_SECRET_LENGTH} characters long. Generate one with: openssl rand -hex 32`,
       );
     }
-    if (secret === "your_hex_secret_here" || secret === "changeme") {
+    if (PLACEHOLDER_SECRETS.includes(secret)) {
       errors.push(
         "JWT_SECRET appears to be a placeholder. Generate a secure secret with: openssl rand -hex 32",
       );
@@ -54,12 +59,12 @@ export function validateEnvVars(): ValidationResult {
   // Additional validation for DATABASE_URL
   if (process.env.DATABASE_URL) {
     const dbUrl = process.env.DATABASE_URL;
-    if (
-      !dbUrl.startsWith("postgresql://") &&
-      !dbUrl.startsWith("postgres://")
-    ) {
+    const hasValidProtocol = VALID_DB_PROTOCOLS.some((protocol) =>
+      dbUrl.startsWith(protocol),
+    );
+    if (!hasValidProtocol) {
       errors.push(
-        "DATABASE_URL must be a valid PostgreSQL connection string starting with postgresql:// or postgres://",
+        `DATABASE_URL must be a valid PostgreSQL connection string starting with ${VALID_DB_PROTOCOLS.join(" or ")}`,
       );
     }
   }

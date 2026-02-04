@@ -65,6 +65,7 @@ export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 /**
  * Initialize database connection with proper error handling
  * This ensures connection issues are caught early rather than on first query
+ * Note: This is called asynchronously and doesn't block module initialization
  */
 async function initializeDatabase() {
   try {
@@ -85,13 +86,29 @@ async function initializeDatabase() {
   }
 }
 
-// Initialize connection on startup
-initializeDatabase();
+// Initialize connection on startup (fire-and-forget is intentional)
+// The connection will be established asynchronously and Prisma will handle
+// connection retries on individual queries if this fails
+void initializeDatabase();
 
-// Ensure graceful shutdown
+// Ensure graceful shutdown with proper async handling
 if (typeof process !== "undefined") {
-  process.on("beforeExit", async () => {
-    await prisma.$disconnect();
+  // Use SIGTERM/SIGINT for proper async cleanup instead of beforeExit
+  const cleanup = async () => {
+    try {
+      await prisma.$disconnect();
+      console.log("✓ Database disconnected");
+    } catch (error) {
+      console.error("Error disconnecting database:", error);
+    }
+  };
+
+  process.on("SIGTERM", () => {
+    cleanup().finally(() => process.exit(0));
+  });
+
+  process.on("SIGINT", () => {
+    cleanup().finally(() => process.exit(0));
   });
 }
 
