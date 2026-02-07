@@ -6,7 +6,6 @@ import {
   Loader2,
   ImageOff,
   CheckCircle2,
-  UploadCloud,
   Camera,
   RefreshCw,
 } from "lucide-react";
@@ -327,13 +326,6 @@ export function ClientProgressTable() {
       <div className="space-y-4">
         {phases.map((phase) => {
           const checked = reflectionChecked[phase.id] ?? phase.isCompleted;
-          const allUploaded = !!(
-            phase.frontImage &&
-            phase.sideImage &&
-            phase.backImage
-          );
-          const uploadsDisabled =
-            uploadMutation.isPending && activePhaseId === phase.id;
           return (
             <div
               key={phase.id}

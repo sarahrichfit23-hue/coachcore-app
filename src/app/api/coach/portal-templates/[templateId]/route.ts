@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { verifyAuthToken } from "@/lib/auth/token";
 import { Prisma } from "@prisma/client";
-import { type DocumentTemplate } from "@/types";
 import { isValidDocumentTemplate } from "@/lib/document-template";
 
 export const runtime = "nodejs";

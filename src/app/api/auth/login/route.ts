@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { verifyPassword } from "@/lib/auth";
+import { getSupabaseClient } from "@/lib/supabase";
 import { type AppRole, signAuthToken, buildAuthCookie } from "@/lib/auth/token";
+import bcrypt from "bcrypt";
 
 function toAppRole(role: string): AppRole | null {
   const normalized = role.toUpperCase();
@@ -29,12 +30,38 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find user by email
+    // Authenticate with Supabase Auth (handles password hashing)
+    const supabase = getSupabaseClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { success: false, error: "Auth provider not configured" },
+        { status: 500 },
+      );
+    }
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    // Optional dev-only fallback: allow local password check if Supabase auth fails
+    if (error || !data?.user) {
+      const allowLocal = process.env.ALLOW_LOCAL_PASSWORD_DEV === "true";
+      if (!allowLocal) {
+        console.warn("Supabase auth failed for:", email, error?.message);
+        return NextResponse.json(
+          { success: false, error: "Invalid credentials" },
+          { status: 401 },
+        );
+      }
+    }
+
+    // Look up app-specific user record for role and flags
     let user;
     try {
       user = await prisma.user.findUnique({ where: { email } });
     } catch (dbError) {
-      console.error("Database error during login:", dbError);
+      console.error("Database error during app user lookup:", dbError);
       return NextResponse.json(
         {
           success: false,
@@ -45,21 +72,22 @@ export async function POST(request: NextRequest) {
     }
 
     if (!user || !user.isActive) {
-      console.warn("Login attempt for invalid/inactive user:", email);
+      console.warn("Login attempt for invalid/inactive app user:", email);
       return NextResponse.json(
         { success: false, error: "Invalid credentials" },
         { status: 401 },
       );
     }
 
-    const validPassword = await verifyPassword(password, user.password);
-
-    if (!validPassword) {
-      console.warn("Login attempt with invalid password for user:", email);
-      return NextResponse.json(
-        { success: false, error: "Invalid credentials" },
-        { status: 401 },
-      );
+    // If Supabase auth failed but dev fallback is enabled, verify password against local hash
+    if ((error || !data?.user) && process.env.ALLOW_LOCAL_PASSWORD_DEV === "true") {
+      const ok = await bcrypt.compare(password, user.password);
+      if (!ok) {
+        return NextResponse.json(
+          { success: false, error: "Invalid credentials" },
+          { status: 401 },
+        );
+      }
     }
 
     const role = toAppRole(user.role);
@@ -107,7 +135,7 @@ export async function POST(request: NextRequest) {
 
     response.cookies.set(buildAuthCookie(token));
 
-    console.log("Successful login for user:", email, "role:", role);
+    console.log("Successful Supabase login for user:", email, "role:", role);
 
     return response;
   } catch (error) {

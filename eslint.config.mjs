@@ -34,7 +34,7 @@ const eslintConfig = [
       "prettier/prettier": [
         "error",
         {
-          commaDangle: "none",
+          trailingComma: "all",
         },
       ],
     },
