@@ -8,6 +8,10 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  // Use DIRECT_URL for non-pooled connections (migrations)
+  // Set DATABASE_URL to Supabase PgBouncer (port 6543) in serverless
+  // Set DIRECT_URL to direct Postgres (port 5432) with sslmode=require
+  directUrl = env("DIRECT_URL")
 }
 
 // ===========================================

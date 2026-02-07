@@ -12,7 +12,12 @@ This guide gets the app production-ready on Vercel in under a day.
 Set these for `Production` (and optionally `Preview`):
 
 - `NEXT_PUBLIC_APP_URL`: Your production URL (e.g., `https://app.yourdomain.com`)
-- `DATABASE_URL`: Supabase Postgres connection string with `?sslmode=require`
+- `DATABASE_URL`: Supabase PgBouncer pooled connection (recommended on Vercel)
+	- Use port `6543` and add `?sslmode=require&pgbouncer=true&connection_limit=1`
+	- Example: `postgresql://postgres:<PASSWORD>@db.<ref>.supabase.co:6543/postgres?sslmode=require&pgbouncer=true&connection_limit=1`
+- `DIRECT_URL`: Supabase direct Postgres connection for migrations
+	- Use port `5432` and add `?sslmode=require`
+	- Example: `postgresql://postgres:<PASSWORD>@db.<ref>.supabase.co:5432/postgres?sslmode=require`
 - `SUPABASE_URL`: `https://<project-ref>.supabase.co`
 - `SUPABASE_ANON_KEY`: Supabase anon key
 - `JWT_SECRET`: Secure random hex (32+ chars). Generate: `openssl rand -hex 32`
@@ -35,6 +40,8 @@ Set these for `Production` (and optionally `Preview`):
 - Output Directory: default
 
 The `vercel-build` script runs `prisma migrate deploy` before building so your database schema is kept in sync.
+
+Prisma will use `DIRECT_URL` (port 5432) for migrations and `DATABASE_URL` (PgBouncer on port 6543) at runtime.
 
 ## Supabase Auth Setup
 - Enable email/password sign-in (Project → Auth → Providers)
