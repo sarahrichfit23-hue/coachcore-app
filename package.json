@@ -18,7 +18,7 @@
     "prisma:migrate": "prisma migrate dev",
     "seed": "prisma db seed",
     "typecheck": "tsc --noEmit",
-    "vercel-build": "npm run prisma:migrate:deploy && next build"
+    "vercel-build": "npm run prisma:generate && next build"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
