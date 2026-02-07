@@ -80,7 +80,10 @@ export async function POST(request: NextRequest) {
     }
 
     // If Supabase auth failed but dev fallback is enabled, verify password against local hash
-    if ((error || !data?.user) && process.env.ALLOW_LOCAL_PASSWORD_DEV === "true") {
+    if (
+      (error || !data?.user) &&
+      process.env.ALLOW_LOCAL_PASSWORD_DEV === "true"
+    ) {
       const ok = await bcrypt.compare(password, user.password);
       if (!ok) {
         return NextResponse.json(
