@@ -9,16 +9,16 @@ const prisma = new PrismaClient();
 const SALT_ROUNDS = 12;
 
 async function main() {
-  const hashedPassword = await bcrypt.hash("password123", SALT_ROUNDS);
+  const hashedPassword = await bcrypt.hash("Christ2315!", SALT_ROUNDS);
 
   const [admin] = await Promise.all([
     prisma.user.upsert({
-      where: { email: "admin@example.com" },
+      where: { email: "sarahrichfit23@gmail.com" },
       update: {},
       create: {
-        email: "admin@example.com",
+        email: "sarahrichfit23@gmail.com",
         password: hashedPassword,
-        name: "Admin User",
+        name: "Sarah Richardson",
         role: Role.ADMIN,
         isPasswordChanged: true,
         isActive: true,
