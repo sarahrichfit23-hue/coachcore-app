@@ -85,18 +85,18 @@
     "@types/bcrypt": "^6.0.0",
     "@types/nodemailer": "^7.0.4",
     "eslint": "^9",
-    "eslint-config-next": "15.5.7"
+    "eslint-config-next": "15.5.7",
+    "@types/nprogress": "^0.2.3",
+    "eslint-plugin-prettier": "^5.5.4"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^20",
-    "@types/nprogress": "^0.2.3",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "dotenv": "^17.2.3",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.4",
     "prettier": "^3.7.4",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "prisma": "^6.19.0",
