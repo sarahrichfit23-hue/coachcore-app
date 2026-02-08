@@ -32,16 +32,15 @@ export default function ResetPasswordPage() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    async function extractToken() {
+    function extractToken() {
       try {
         // Check for 'code' parameter first (PKCE flow)
         const code = searchParams.get("code");
         if (code) {
-          // For PKCE flow, we need to exchange the code for a session
-          // This requires a server-side call or client-side Supabase client
-          // For now, try to use the code as a query parameter for the API
+          // PKCE flow is not currently supported in this implementation
+          // User should request a new password reset link
           setError(
-            "PKCE flow detected. Please contact support if you continue to have issues.",
+            "This reset link format is not supported. Please request a new password reset link.",
           );
           setIsLoadingToken(false);
           return;
