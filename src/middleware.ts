@@ -3,7 +3,7 @@ import { verifyAuthToken, type AppRole } from "@/lib/auth/token";
 
 const PROTECTED_PREFIXES = ["/admin", "/coach", "/client"] as const;
 const LOGIN_PATH = "/login";
-const PUBLIC_AUTH_PATHS = ["/reset-password"] as const;
+const PUBLIC_AUTH_PATHS = ["/reset-password", "/forgot-password"] as const;
 
 // Timeout for token verification in middleware (milliseconds)
 const TOKEN_VERIFICATION_TIMEOUT_MS = 5000;
@@ -138,5 +138,7 @@ export const config = {
     "/client",
     "/client/:path*",
     "/login",
+    "/reset-password",
+    "/forgot-password",
   ],
 };
