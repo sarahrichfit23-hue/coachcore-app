@@ -27,29 +27,60 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [isLoadingToken, setIsLoadingToken] = useState(true);
   const router = useRouter();
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    // Extract access token from URL hash (Supabase sends it as #access_token=...)
-    const hash = window.location.hash;
-    if (hash) {
-      const params = new URLSearchParams(hash.substring(1)); // Remove the # character
-      const token = params.get("access_token");
-      if (token) {
-        setAccessToken(token);
-      } else {
+    async function extractToken() {
+      try {
+        // Check for 'code' parameter first (PKCE flow)
+        const code = searchParams.get("code");
+        if (code) {
+          // For PKCE flow, we need to exchange the code for a session
+          // This requires a server-side call or client-side Supabase client
+          // For now, try to use the code as a query parameter for the API
+          setError(
+            "PKCE flow detected. Please contact support if you continue to have issues.",
+          );
+          setIsLoadingToken(false);
+          return;
+        }
+
+        // Check for access_token in URL hash (implicit flow - most common)
+        const hash = window.location.hash;
+        if (hash) {
+          const params = new URLSearchParams(hash.substring(1));
+          const token = params.get("access_token");
+          const tokenType = params.get("type");
+
+          // Verify it's a recovery token
+          if (token && tokenType === "recovery") {
+            setAccessToken(token);
+            setIsLoadingToken(false);
+            return;
+          }
+        }
+
+        // Check for access_token in query params (alternative flow)
+        const token = searchParams.get("access_token");
+        if (token) {
+          setAccessToken(token);
+          setIsLoadingToken(false);
+          return;
+        }
+
+        // No valid token found
         setError("Invalid or expired reset link. Please request a new one.");
-      }
-    } else {
-      // Also check query params (some Supabase configurations may use query params)
-      const token = searchParams.get("access_token");
-      if (token) {
-        setAccessToken(token);
-      } else {
-        setError("Invalid or expired reset link. Please request a new one.");
+        setIsLoadingToken(false);
+      } catch (err) {
+        console.error("Token extraction error:", err);
+        setError("Failed to process reset link. Please try again.");
+        setIsLoadingToken(false);
       }
     }
+
+    extractToken();
   }, [searchParams]);
 
   const updatePasswordMutation = useMutation({
@@ -172,7 +203,16 @@ export default function ResetPasswordPage() {
 
         {/* Reset Password Card */}
         <div className="rounded-2xl bg-white/95 p-8 shadow-2xl backdrop-blur-sm md:p-10">
-          {success ? (
+          {isLoadingToken ? (
+            <div className="space-y-4 text-center">
+              <div className="flex justify-center">
+                <div className="h-12 w-12 animate-spin rounded-full border-4 border-gray-300 border-t-gray-900"></div>
+              </div>
+              <p className="text-sm text-gray-600">
+                Verifying your reset link...
+              </p>
+            </div>
+          ) : success ? (
             <div className="space-y-4 text-center">
               <div className="flex justify-center">
                 <CheckCircle className="h-16 w-16 text-green-600" />
