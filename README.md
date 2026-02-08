@@ -124,9 +124,10 @@ All pages use the React-Page builder and support text, lists, images, videos, an
 3. Set up your PostgreSQL database (Supabase recommended)
 4. Configure Cloudflare R2 storage (see below)
 5. Create a `.env` file and add your environment variables (see Required Environment Variables below)
-6. **Deploy database schema**: `npm run prisma:push` (see [Prisma Deployment Guide](./docs/PRISMA_DEPLOYMENT_GUIDE.md))
-7. Seed the database: `npm run seed`
-8. Start the development server: `npm run dev`
+6. **Verify environment setup**: `npm run check-env` (recommended to catch config issues early)
+7. **Deploy database schema**: `npm run prisma:push` (see [Prisma Deployment Guide](./docs/PRISMA_DEPLOYMENT_GUIDE.md))
+8. Seed the database: `npm run seed`
+9. Start the development server: `npm run dev`
 
 ### Required Environment Variables
 
@@ -207,3 +208,52 @@ Example:
 ```
 R2_PUBLIC_URL=https://pub-xxxxxxxxxxxxx.r2.dev
 ```
+
+## Troubleshooting
+
+### Database Connection Error
+
+If you encounter the error **"Database connection error. Please try again."** when trying to log in:
+
+**Cause**: The `.env` file is missing or not properly configured.
+
+**Solution**:
+1. Check if the `.env` file exists in the project root:
+   ```bash
+   ls -la .env
+   ```
+
+2. If missing, create it from the backup or example:
+   ```bash
+   # If you have a backup:
+   cp .env.bak .env
+   
+   # Or create from the example:
+   cp .env.example .env
+   ```
+
+3. Edit the `.env` file and ensure these critical variables are set:
+   ```
+   DATABASE_URL=postgresql://...
+   DIRECT_URL=postgresql://...
+   JWT_SECRET=your_secret_here
+   SUPABASE_URL=https://...
+   SUPABASE_ANON_KEY=...
+   ```
+
+4. Run the environment checker to verify everything is configured correctly:
+   ```bash
+   npm run check-env
+   ```
+   
+5. The Prisma client should automatically regenerate when you install dependencies:
+   ```bash
+   npm install
+   ```
+
+6. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+**Note**: The `.env` file is intentionally excluded from version control (via `.gitignore`) for security. Each developer or deployment environment needs their own `.env` file.
