@@ -20,7 +20,9 @@ function getFixedDatabaseUrl(): string | undefined {
     url = url.replace(/[&?]connection_limit=\d+/g, "");
     // Clean up any trailing ? or &
     url = url.replace(/[?&]$/, "");
-    console.warn("Auto-fixed DATABASE_URL: changed port 6543 -> 5432 (old PgBouncer port is deprecated)");
+    console.warn(
+      "Auto-fixed DATABASE_URL: changed port 6543 -> 5432 (old PgBouncer port is deprecated)",
+    );
   }
 
   return url;
@@ -66,7 +68,7 @@ function validateEnvironment(): boolean {
 }
 
 // Validate environment on startup (warn only, don't crash)
-const isEnvValid = validateEnvironment();
+const _isEnvValid = validateEnvironment();
 
 /**
  * Create Prisma client with optimized settings for serverless environments
