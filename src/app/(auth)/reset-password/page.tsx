@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { Eye, EyeOff, CheckCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 interface UpdatePasswordResponse {
   success: boolean;
@@ -29,32 +30,70 @@ export default function ResetPasswordPage() {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoadingToken, setIsLoadingToken] = useState(true);
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
-    function extractToken() {
+    async function handleAuthFlow() {
       try {
+        const supabase = getSupabaseBrowserClient();
+        
         // Check for 'code' parameter first (PKCE flow)
-        const code = searchParams.get("code");
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get("code");
+        
         if (code) {
-          // PKCE flow is not currently supported in this implementation
-          // User should request a new password reset link
-          setError(
-            "This reset link format is not supported. Please request a new password reset link.",
-          );
+          // Exchange code for session
+          const { error: exchangeError } =
+            await supabase.auth.exchangeCodeForSession(code);
+
+          if (exchangeError) {
+            console.error("Code exchange error:", exchangeError);
+            setError(
+              "Invalid or expired reset link. Please request a new password reset.",
+            );
+            setIsLoadingToken(false);
+            return;
+          }
+
+          // Get session to extract access token
+          const { data: sessionData, error: sessionError } =
+            await supabase.auth.getSession();
+
+          if (sessionError || !sessionData?.session?.access_token) {
+            console.error("Session retrieval error:", sessionError);
+            setError(
+              "Failed to establish session. Please request a new password reset.",
+            );
+            setIsLoadingToken(false);
+            return;
+          }
+
+          setAccessToken(sessionData.session.access_token);
           setIsLoadingToken(false);
           return;
         }
 
-        // Check for access_token in URL hash (implicit flow - most common)
+        // Check for access_token in URL hash (implicit flow)
         const hash = window.location.hash;
         if (hash) {
-          const params = new URLSearchParams(hash.substring(1));
-          const token = params.get("access_token");
-          const tokenType = params.get("type");
+          const hashParams = new URLSearchParams(hash.substring(1));
+          const token = hashParams.get("access_token");
+          const tokenType = hashParams.get("type");
 
           // Verify it's a recovery token
           if (token && tokenType === "recovery") {
+            // Verify the session is valid
+            const { data: sessionData, error: sessionError } =
+              await supabase.auth.getSession();
+
+            if (sessionError || !sessionData?.session) {
+              console.error("Session verification error:", sessionError);
+              setError(
+                "Invalid or expired reset link. Please request a new password reset.",
+              );
+              setIsLoadingToken(false);
+              return;
+            }
+
             setAccessToken(token);
             setIsLoadingToken(false);
             return;
@@ -62,7 +101,7 @@ export default function ResetPasswordPage() {
         }
 
         // Check for access_token in query params (alternative flow)
-        const token = searchParams.get("access_token");
+        const token = urlParams.get("access_token");
         if (token) {
           setAccessToken(token);
           setIsLoadingToken(false);
@@ -79,8 +118,8 @@ export default function ResetPasswordPage() {
       }
     }
 
-    extractToken();
-  }, [searchParams]);
+    handleAuthFlow();
+  }, []);
 
   const updatePasswordMutation = useMutation({
     mutationFn: async ({

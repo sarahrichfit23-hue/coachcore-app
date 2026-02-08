@@ -138,6 +138,5 @@ export const config = {
     "/client",
     "/client/:path*",
     "/login",
-    "/reset-password",
   ],
 };
