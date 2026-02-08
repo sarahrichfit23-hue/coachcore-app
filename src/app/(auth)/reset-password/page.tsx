@@ -31,11 +31,13 @@ export default function ResetPasswordPage() {
   const [isLoadingToken, setIsLoadingToken] = useState(true);
   const router = useRouter();
 
-  useEffect(() => {
-    async function handleAuthFlow() {
-      try {
-        const supabase = getSupabaseBrowserClient();
+  // Get Supabase client once at component level
+  const supabase = getSupabaseBrowserClient();
 
+  useEffect(() => {
+    // Use IIFE pattern to handle async operations in useEffect
+    (async () => {
+      try {
         // Check for 'code' parameter first (PKCE flow)
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get("code");
@@ -116,10 +118,8 @@ export default function ResetPasswordPage() {
         setError("Failed to process reset link. Please try again.");
         setIsLoadingToken(false);
       }
-    }
-
-    handleAuthFlow();
-  }, []);
+    })();
+  }, [supabase]);
 
   const updatePasswordMutation = useMutation({
     mutationFn: async ({

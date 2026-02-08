@@ -20,6 +20,7 @@ export function getSupabaseBrowserClient(): SupabaseClient {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
+      storageKey: "coachcore-auth",
     },
   });
   return browserClient;
