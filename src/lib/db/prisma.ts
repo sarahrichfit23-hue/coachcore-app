@@ -5,18 +5,42 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 /**
- * Validate critical environment variables
+ * Fix DATABASE_URL if it uses the old PgBouncer port 6543
+ * Supabase deprecated port 6543 - direct connections use port 5432
  */
-function validateEnvironment() {
+function getFixedDatabaseUrl(): string | undefined {
+  let url = process.env.DATABASE_URL;
+  if (!url) return undefined;
+
+  // Auto-fix old PgBouncer port 6543 -> direct port 5432
+  if (url.includes(":6543")) {
+    url = url.replace(":6543", ":5432");
+    // Remove pgbouncer params that don't apply to direct connections
+    url = url.replace(/[&?]pgbouncer=true/g, "");
+    url = url.replace(/[&?]connection_limit=\d+/g, "");
+    // Clean up any trailing ? or &
+    url = url.replace(/[?&]$/, "");
+    console.warn("Auto-fixed DATABASE_URL: changed port 6543 -> 5432 (old PgBouncer port is deprecated)");
+  }
+
+  return url;
+}
+
+const fixedDatabaseUrl = getFixedDatabaseUrl();
+
+/**
+ * Validate critical environment variables
+ * Warns but does not crash the app if variables are missing
+ */
+function validateEnvironment(): boolean {
   const errors: string[] = [];
 
-  if (!process.env.DATABASE_URL) {
+  if (!fixedDatabaseUrl) {
     errors.push("DATABASE_URL is not defined");
   } else {
-    const dbUrl = process.env.DATABASE_URL;
     if (
-      !dbUrl.startsWith("postgresql://") &&
-      !dbUrl.startsWith("postgres://")
+      !fixedDatabaseUrl.startsWith("postgresql://") &&
+      !fixedDatabaseUrl.startsWith("postgres://")
     ) {
       errors.push("DATABASE_URL must be a valid PostgreSQL connection string");
     }
@@ -30,18 +54,19 @@ function validateEnvironment() {
 
   if (errors.length > 0) {
     const errorMessage = [
-      "❌ Critical environment variables are missing or invalid:",
+      "Environment variables missing or invalid:",
       ...errors.map((e) => `  - ${e}`),
       "",
-      "Please check your .env file. See .env.example for reference.",
+      "Please check your .env file or Vercel Vars. See .env.example for reference.",
     ].join("\n");
-    console.error(errorMessage);
-    throw new Error("Environment validation failed");
+    console.warn(errorMessage);
+    return false;
   }
+  return true;
 }
 
-// Validate environment on startup
-validateEnvironment();
+// Validate environment on startup (warn only, don't crash)
+const isEnvValid = validateEnvironment();
 
 /**
  * Create Prisma client with optimized settings for serverless environments
@@ -54,7 +79,7 @@ function createPrismaClient() {
         : ["error"],
     datasources: {
       db: {
-        url: process.env.DATABASE_URL,
+        url: fixedDatabaseUrl || process.env.DATABASE_URL,
       },
     },
   });
