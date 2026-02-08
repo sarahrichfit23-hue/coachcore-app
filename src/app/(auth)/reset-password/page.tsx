@@ -35,11 +35,11 @@ export default function ResetPasswordPage() {
     async function handleAuthFlow() {
       try {
         const supabase = getSupabaseBrowserClient();
-        
+
         // Check for 'code' parameter first (PKCE flow)
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get("code");
-        
+
         if (code) {
           // Exchange code for session
           const { error: exchangeError } =
