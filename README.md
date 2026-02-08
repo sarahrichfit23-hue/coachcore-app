@@ -1,6 +1,23 @@
 # Coach Core
 
-**⚠️ IMPORTANT:** If you're experiencing login issues or "Database connection error", see the **[Login Issue Resolution Guide](./docs/LOGIN_FIX.md)** for immediate help.
+## 🚨 LOGIN ISSUE? READ THIS FIRST 🚨
+
+**If you cannot log in or see "Database connection error":**
+
+```bash
+# Quick Fix (30 seconds):
+cp .env.bak .env
+npm install
+npm run dev
+```
+
+**Detailed Help:**
+- **Quick Reference:** [QUICK_FIX.md](./QUICK_FIX.md) ⭐ Start here!
+- **Complete Guide:** [docs/LOGIN_FIX.md](./docs/LOGIN_FIX.md)
+- **Troubleshooting:** [docs/TROUBLESHOOTING.md](./docs/TROUBLESHOOTING.md)
+- **Automated Setup:** Run `bash scripts/setup.sh`
+
+---
 
 ## Project Overview
 
