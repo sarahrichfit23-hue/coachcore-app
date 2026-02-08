@@ -82,7 +82,7 @@ export default function ResetPasswordPage() {
       setError("");
       setSuccess(true);
       toast.success(data.message || "Password updated successfully!");
-      
+
       // Redirect to login after 3 seconds
       setTimeout(() => {
         router.push("/login");

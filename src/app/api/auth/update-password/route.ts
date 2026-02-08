@@ -61,9 +61,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user from the access token
-    const { data: userData, error: userError } = await supabase.auth.getUser(
-      accessToken,
-    );
+    const { data: userData, error: userError } =
+      await supabase.auth.getUser(accessToken);
 
     if (userError || !userData?.user) {
       console.error("Failed to get user from token:", userError?.message);
