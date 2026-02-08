@@ -267,8 +267,6 @@ npm run dev
 
 See the [complete troubleshooting guide](./docs/TROUBLESHOOTING.md) for more details.
 
-## Database Connection Error
-
 ### Database Connection Error
 
 If you encounter the error **"Database connection error. Please try again."** when trying to log in:
