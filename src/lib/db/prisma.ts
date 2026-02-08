@@ -21,23 +21,25 @@ function fixSupabasePort(envKey: string) {
   fixed = fixed.replace(/[?&]$/, "");
 
   process.env[envKey] = fixed;
-  console.log(
-    `[v0] Auto-fixed ${envKey}: port 6543 -> 5432`,
-  );
+  console.log(`[v0] Auto-fixed ${envKey}: port 6543 -> 5432`);
 }
 
 // Fix env vars BEFORE anything else reads them
 fixSupabasePort("DATABASE_URL");
 fixSupabasePort("DIRECT_URL");
 
-// Debug: log what Prisma will actually receive
+// Debug: confirm this version of prisma.ts is running
+console.log("[v0] prisma.ts v2 loaded");
 console.log(
-  "[v0] DATABASE_URL for Prisma:",
+  "[v0] DATABASE_URL:",
   process.env.DATABASE_URL
-    ? process.env.DATABASE_URL.replace(
-        /\/\/[^:]+:[^@]+@/,
-        "//***:***@",
-      )
+    ? process.env.DATABASE_URL.replace(/\/\/[^:]+:[^@]+@/, "//***:***@")
+    : "NOT SET",
+);
+console.log(
+  "[v0] DIRECT_URL:",
+  process.env.DIRECT_URL
+    ? process.env.DIRECT_URL.replace(/\/\/[^:]+:[^@]+@/, "//***:***@")
     : "NOT SET",
 );
 
