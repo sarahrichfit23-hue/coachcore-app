@@ -211,6 +211,29 @@ R2_PUBLIC_URL=https://pub-xxxxxxxxxxxxx.r2.dev
 
 ## Troubleshooting
 
+If you encounter issues with database connections, authentication, or environment setup, see the **[Troubleshooting Guide](./docs/TROUBLESHOOTING.md)** for detailed solutions.
+
+### Quick Fixes
+
+**Cannot login / Database connection error:**
+```bash
+# Restore .env file
+cp .env.bak .env  # or cp .env.example .env
+
+# Verify environment
+npm run check-env
+
+# Reinstall dependencies
+npm install
+
+# Start the app
+npm run dev
+```
+
+See the [complete troubleshooting guide](./docs/TROUBLESHOOTING.md) for more details.
+
+## Database Connection Error
+
 ### Database Connection Error
 
 If you encounter the error **"Database connection error. Please try again."** when trying to log in:
