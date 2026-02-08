@@ -23,8 +23,11 @@ export async function POST(request: NextRequest) {
 
     // Send password reset email via Supabase
     // This will send an email with a link to: https://www.coachcoreportal.com/reset-password
+    const baseUrl = (
+      process.env.NEXT_PUBLIC_APP_URL || "https://www.coachcoreportal.com"
+    ).trim();
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || "https://www.coachcoreportal.com"}/reset-password`,
+      redirectTo: `${baseUrl}/reset-password`,
     });
 
     if (error) {
