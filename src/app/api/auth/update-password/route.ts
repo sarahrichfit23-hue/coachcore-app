@@ -81,14 +81,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Update password in Supabase Auth
-    const { error: updateError } = await supabase.auth.updateUser(
-      {
-        password: newPassword,
-      },
-      {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || "https://www.coachcoreportal.com"}/login`,
-      },
-    );
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
 
     if (updateError) {
       console.error("Supabase password update error:", updateError.message);
@@ -100,29 +95,41 @@ export async function POST(request: NextRequest) {
 
     // Update password hash in our database
     const hashedPassword = await hashPassword(newPassword);
-    const user = await prisma.user.update({
-      where: { email: email.toLowerCase().trim() },
-      data: {
-        password: hashedPassword,
-        isPasswordChanged: true,
-      },
-      select: {
-        id: true,
-        email: true,
-        role: true,
-      },
-    });
-
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Password updated successfully",
+    try {
+      const user = await prisma.user.update({
+        where: { email: email.toLowerCase().trim() },
         data: {
-          email: user.email,
+          password: hashedPassword,
+          isPasswordChanged: true,
         },
-      },
-      { status: 200 },
-    );
+        select: {
+          id: true,
+          email: true,
+          role: true,
+        },
+      });
+
+      return NextResponse.json(
+        {
+          success: true,
+          message: "Password updated successfully",
+          data: {
+            email: user.email,
+          },
+        },
+        { status: 200 },
+      );
+    } catch (dbError) {
+      console.error("Database update error:", dbError);
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "Password updated in auth system but failed to sync with database. Please contact support.",
+        },
+        { status: 500 },
+      );
+    }
   } catch (error) {
     console.error("Update password error:", error);
     return NextResponse.json(
