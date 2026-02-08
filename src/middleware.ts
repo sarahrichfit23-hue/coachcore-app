@@ -3,6 +3,7 @@ import { verifyAuthToken, type AppRole } from "@/lib/auth/token";
 
 const PROTECTED_PREFIXES = ["/admin", "/coach", "/client"] as const;
 const LOGIN_PATH = "/login";
+const PUBLIC_AUTH_PATHS = ["/reset-password"] as const;
 
 // Timeout for token verification in middleware (milliseconds)
 const TOKEN_VERIFICATION_TIMEOUT_MS = 5000;
@@ -24,9 +25,18 @@ function isProtectedPath(pathname: string): boolean {
   return PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 }
 
+function isPublicAuthPath(pathname: string): boolean {
+  return PUBLIC_AUTH_PATHS.some((path) => pathname.startsWith(path));
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("token")?.value;
+
+  // Allow public auth paths (like /reset-password) to bypass all auth checks
+  if (isPublicAuthPath(pathname)) {
+    return NextResponse.next();
+  }
 
   // Verify token with timeout protection
   let session = null;
@@ -128,5 +138,6 @@ export const config = {
     "/client",
     "/client/:path*",
     "/login",
+    "/reset-password",
   ],
 };
