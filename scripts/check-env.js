@@ -53,7 +53,11 @@ function checkEnvFile() {
 }
 
 function checkRequiredVars() {
-  require('dotenv').config();
+  // Only try to load .env if it exists
+  const envPath = path.join(process.cwd(), '.env');
+  if (fs.existsSync(envPath)) {
+    require('dotenv').config();
+  }
 
   const requiredVars = [
     { name: 'DATABASE_URL', description: 'PostgreSQL connection string' },
