@@ -32,6 +32,7 @@ export default function ResetPasswordPage() {
   const router = useRouter();
 
   // Get Supabase client once at component level
+  // Note: This is a stable singleton instance that won't cause re-renders
   const supabase = getSupabaseBrowserClient();
 
   useEffect(() => {

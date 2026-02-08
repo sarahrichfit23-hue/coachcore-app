@@ -2,6 +2,9 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 let browserClient: SupabaseClient | null = null;
 
+// Use a unique storage key to prevent session conflicts with other Supabase projects
+const SUPABASE_STORAGE_KEY = "coachcore-auth";
+
 export function getSupabaseBrowserClient(): SupabaseClient {
   if (browserClient) {
     return browserClient;
@@ -20,7 +23,7 @@ export function getSupabaseBrowserClient(): SupabaseClient {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
-      storageKey: "coachcore-auth",
+      storageKey: SUPABASE_STORAGE_KEY,
     },
   });
   return browserClient;
