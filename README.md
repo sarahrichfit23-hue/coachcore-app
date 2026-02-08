@@ -1,5 +1,24 @@
 # Coach Core
 
+## 🚨 LOGIN ISSUE? READ THIS FIRST 🚨
+
+**If you cannot log in or see "Database connection error":**
+
+```bash
+# Quick Fix (30 seconds):
+cp .env.bak .env
+npm install
+npm run dev
+```
+
+**Detailed Help:**
+- **Quick Reference:** [QUICK_FIX.md](./QUICK_FIX.md) ⭐ Start here!
+- **Complete Guide:** [docs/LOGIN_FIX.md](./docs/LOGIN_FIX.md)
+- **Troubleshooting:** [docs/TROUBLESHOOTING.md](./docs/TROUBLESHOOTING.md)
+- **Automated Setup:** Run `bash scripts/setup.sh`
+
+---
+
 ## Project Overview
 
 This project is a web-based platform designed to streamline the relationship between coaches and their clients, focusing on personalized fitness or coaching programs. The core functionality revolves around coaches creating customizable document templates (e.g., introduction, onboarding, and workout planners) using a drag-and-drop builder. Coaches can onboard clients by inputting personal details and tailoring these templates, including creating multi-phase workout plans with drag-and-drop interfaces. Once onboarded, clients receive access to view their personalized documents, track progress through photo uploads and checkboxes, and communicate with the coach. The system includes a coach dashboard for managing multiple clients, viewing progress, and handling messages. An admin role is included for system oversight, such as managing users, resolving inquiries, and monitoring platform health.
@@ -117,7 +136,23 @@ All pages use the React-Page builder and support text, lists, images, videos, an
 
 ## Setup Instructions
 
-### Quick Start
+### Automated Setup (Recommended)
+
+Run the setup script to automatically restore your environment:
+
+```bash
+bash scripts/setup.sh
+```
+
+This script will:
+- Restore the `.env` file from backup
+- Install dependencies
+- Verify environment configuration
+- Report any issues
+
+### Manual Setup
+
+If you prefer manual setup or the automated script fails:
 
 1. Clone the repository
 2. Install dependencies: `npm install`
@@ -210,6 +245,27 @@ R2_PUBLIC_URL=https://pub-xxxxxxxxxxxxx.r2.dev
 ```
 
 ## Troubleshooting
+
+If you encounter issues with database connections, authentication, or environment setup, see the **[Troubleshooting Guide](./docs/TROUBLESHOOTING.md)** for detailed solutions.
+
+### Quick Fixes
+
+**Cannot login / Database connection error:**
+```bash
+# Restore .env file
+cp .env.bak .env  # or cp .env.example .env
+
+# Verify environment
+npm run check-env
+
+# Reinstall dependencies
+npm install
+
+# Start the app
+npm run dev
+```
+
+See the [complete troubleshooting guide](./docs/TROUBLESHOOTING.md) for more details.
 
 ### Database Connection Error
 

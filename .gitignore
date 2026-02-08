@@ -38,8 +38,9 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
-# Keep .env.example for reference
+# Keep these files for reference and backup
 !.env.example
+!.env.bak
 
 # vercel
 .vercel
