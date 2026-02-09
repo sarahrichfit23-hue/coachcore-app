@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { hashPassword } from "@/lib/auth/password";
+import { getSupabaseClient } from "@/lib/supabase";
 import {
   buildAuthCookie,
   getSession,
@@ -76,12 +76,31 @@ export async function handlePasswordChange(request: NextRequest) {
       );
     }
 
-    const hashed = await hashPassword(newPassword);
+    // Update password in Supabase Auth
+    const supabase = getSupabaseClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { success: false, error: "Auth provider not configured" },
+        { status: 500 },
+      );
+    }
 
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    if (updateError) {
+      console.error("Supabase password update error:", updateError.message);
+      return NextResponse.json(
+        { success: false, error: "Failed to update password" },
+        { status: 500 },
+      );
+    }
+
+    // Update metadata in Prisma (do not update password field)
     const updatedUser = await prisma.user.update({
       where: { id: user.id },
       data: {
-        password: hashed,
         isPasswordChanged: true,
       },
       select: {

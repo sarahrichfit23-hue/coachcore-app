@@ -46,7 +46,7 @@ model RolePermission {
 model User {
   id                String  @id @default(cuid())
   email             String  @unique
-  password          String
+  password          String? // Optional - do not use; migrating to Supabase Auth
   name              String
   role              Role    @default(CLIENT)
   isPasswordChanged Boolean @default(false) // First login flow: must change generated password
