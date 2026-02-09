@@ -32,7 +32,13 @@ interface SessionContextType {
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
 // Public pages that don't require authentication
-const PUBLIC_PAGES = ["/login", "/", "/404"];
+const PUBLIC_PAGES = [
+  "/login",
+  "/",
+  "/404",
+  "/reset-password",
+  "/forgot-password",
+];
 
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
