@@ -7,6 +7,7 @@ interface UpdatePasswordBody {
   newPassword?: string;
   confirmPassword?: string;
   accessToken?: string;
+  refreshToken?: string;
 }
 
 function validatePassword(password: string): string | null {
@@ -22,6 +23,7 @@ export async function POST(request: NextRequest) {
     const newPassword = body?.newPassword?.trim();
     const confirmPassword = body?.confirmPassword?.trim();
     const accessToken = body?.accessToken?.trim();
+    const refreshToken = body?.refreshToken?.trim();
 
     if (!newPassword || !confirmPassword) {
       return NextResponse.json(
@@ -45,9 +47,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!accessToken) {
+    if (!accessToken || !refreshToken) {
       return NextResponse.json(
-        { success: false, error: "Access token is required" },
+        { success: false, error: "Reset link is missing required tokens" },
         { status: 400 },
       );
     }
@@ -57,6 +59,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { success: false, error: "Auth provider not configured" },
         { status: 500 },
+      );
+    }
+
+    const { data: sessionData, error: sessionError } =
+      await supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      });
+
+    if (sessionError || !sessionData?.session) {
+      console.error("Failed to establish session from reset tokens:", {
+        message: sessionError?.message,
+      });
+      return NextResponse.json(
+        { success: false, error: "Invalid or expired reset link" },
+        { status: 401 },
       );
     }
 
