@@ -152,8 +152,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error:
-            "Password updated in auth system but failed to sync with database. Please contact support.",
+          error: isRetryable
+            ? "We updated your password, but the database is temporarily unavailable. Please try again in a few minutes."
+            : "Password updated in auth system but failed to sync with database. Please contact support.",
+          errorCode: prismaError?.code ?? null,
         },
         { status: 500 },
       );
