@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { getSupabaseClient } from "@/lib/supabase";
 import { prisma } from "@/lib/db";
-import { hashPassword } from "@/lib/auth/password";
 
 interface UpdatePasswordBody {
   newPassword?: string;
@@ -131,14 +130,14 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      const user = await updatePasswordWithRetry(existingUser.id, newPassword);
+      await updatePasswordMetadataWithRetry(existingUser.id);
 
       return NextResponse.json(
         {
           success: true,
           message: "Password updated successfully",
           data: {
-            email: user.email,
+            email: existingUser.email,
           },
         },
         { status: 200 },
@@ -148,13 +147,14 @@ export async function POST(request: NextRequest) {
         dbError instanceof Prisma.PrismaClientKnownRequestError
           ? { code: dbError.code, message: dbError.message }
           : undefined;
+
       console.error("Database update error:", { dbError, prismaError });
+
       return NextResponse.json(
         {
           success: false,
-          error: isRetryable
-            ? "We updated your password, but the database is temporarily unavailable. Please try again in a few minutes."
-            : "Password updated in auth system but failed to sync with database. Please contact support.",
+          error:
+            "Password updated in auth system but failed to sync with database. Please contact support.",
           errorCode: prismaError?.code ?? null,
         },
         { status: 500 },
@@ -169,7 +169,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function updatePasswordWithRetry(userId: string, hashedPassword: string) {
+async function updatePasswordMetadataWithRetry(userId: string) {
   const maxAttempts = 3;
   let lastError: unknown;
 
@@ -178,7 +178,6 @@ async function updatePasswordWithRetry(userId: string, hashedPassword: string) {
       return await prisma.user.update({
         where: { id: userId },
         data: {
-          password: hashedPassword,
           isPasswordChanged: true,
         },
         select: {
