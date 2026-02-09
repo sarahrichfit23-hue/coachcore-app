@@ -148,9 +148,6 @@ export async function POST(request: NextRequest) {
         dbError instanceof Prisma.PrismaClientKnownRequestError
           ? { code: dbError.code, message: dbError.message }
           : undefined;
-      const retryableCodes = new Set(["P1001", "P1002", "P1003", "P1017"]);
-      const isRetryable =
-        prismaError?.code && retryableCodes.has(prismaError.code);
       console.error("Database update error:", { dbError, prismaError });
       return NextResponse.json(
         {
@@ -172,13 +169,12 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function updatePasswordWithRetry(userId: string, newPassword: string) {
+async function updatePasswordWithRetry(userId: string, hashedPassword: string) {
   const maxAttempts = 3;
   let lastError: unknown;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     try {
-      const hashedPassword = await hashPassword(newPassword);
       return await prisma.user.update({
         where: { id: userId },
         data: {
