@@ -28,6 +28,7 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [isLoadingToken, setIsLoadingToken] = useState(true);
   const router = useRouter();
 
@@ -71,6 +72,7 @@ export default function ResetPasswordPage() {
           }
 
           setAccessToken(sessionData.session.access_token);
+          setRefreshToken(sessionData.session.refresh_token);
           setIsLoadingToken(false);
           return;
         }
@@ -80,6 +82,7 @@ export default function ResetPasswordPage() {
         if (hash) {
           const hashParams = new URLSearchParams(hash.substring(1));
           const token = hashParams.get("access_token");
+          const refresh = hashParams.get("refresh_token");
           const tokenType = hashParams.get("type");
 
           // Verify it's a recovery token
@@ -98,6 +101,7 @@ export default function ResetPasswordPage() {
             }
 
             setAccessToken(token);
+            setRefreshToken(refresh);
             setIsLoadingToken(false);
             return;
           }
@@ -107,6 +111,10 @@ export default function ResetPasswordPage() {
         const token = urlParams.get("access_token");
         if (token) {
           setAccessToken(token);
+          const refresh = urlParams.get("refresh_token");
+          if (refresh) {
+            setRefreshToken(refresh);
+          }
           setIsLoadingToken(false);
           return;
         }
@@ -127,17 +135,24 @@ export default function ResetPasswordPage() {
       newPassword,
       confirmPassword,
       accessToken,
+      refreshToken,
     }: {
       newPassword: string;
       confirmPassword: string;
       accessToken: string;
+      refreshToken: string;
     }) => {
       const response = await fetch("/api/auth/update-password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ newPassword, confirmPassword, accessToken }),
+        body: JSON.stringify({
+          newPassword,
+          confirmPassword,
+          accessToken,
+          refreshToken,
+        }),
       });
 
       const data = (await response.json()) as UpdatePasswordResponse;
@@ -171,7 +186,7 @@ export default function ResetPasswordPage() {
     e.preventDefault();
     setError("");
 
-    if (!accessToken) {
+    if (!accessToken || !refreshToken) {
       setError("Invalid or expired reset link. Please request a new one.");
       return;
     }
@@ -196,6 +211,7 @@ export default function ResetPasswordPage() {
         newPassword,
         confirmPassword,
         accessToken,
+        refreshToken,
       });
     } catch {
       // Error is already handled by onError callback

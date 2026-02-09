@@ -23,9 +23,21 @@ export async function POST(request: NextRequest) {
 
     // Send password reset email via Supabase
     // This will send an email with a link to: https://www.coachcoreportal.com/reset-password
-    const baseUrl = (
-      process.env.NEXT_PUBLIC_APP_URL || "https://www.coachcoreportal.com"
-    ).trim();
+    const envAppUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
+    let baseUrl = request.nextUrl.origin;
+
+    if (envAppUrl) {
+      try {
+        baseUrl = new URL(envAppUrl).origin;
+      } catch (error) {
+        console.warn("Invalid NEXT_PUBLIC_APP_URL, falling back to request:", {
+          envAppUrl,
+          error,
+        });
+      }
+    } else if (!baseUrl) {
+      baseUrl = "https://www.coachcoreportal.com";
+    }
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${baseUrl}/reset-password`,
     });
