@@ -5,11 +5,13 @@ This directory contains comprehensive documentation for deploying your Prisma sc
 ## 📄 Documentation Files
 
 ### 1. [PRISMA_QUICK_START.md](./PRISMA_QUICK_START.md) ⚡
+
 **TL;DR - Just want to get started?**
 
 A concise one-page guide that gets you up and running in seconds.
 
 **Contains:**
+
 - Single command to deploy: `npx prisma db push`
 - Quick commands reference
 - Environment setup checklist
@@ -19,11 +21,13 @@ A concise one-page guide that gets you up and running in seconds.
 ---
 
 ### 2. [PRISMA_DEPLOYMENT_GUIDE.md](./PRISMA_DEPLOYMENT_GUIDE.md) 📖
+
 **Complete comprehensive guide**
 
 Full documentation covering all deployment scenarios with detailed explanations.
 
 **Contains:**
+
 - ✅ Schema validation confirmation
 - 🚀 Option 1: Run `npx prisma db push` locally (RECOMMENDED)
 - 🔄 Option 2: Run in CI/CD pipeline (GitHub Actions, Vercel)
@@ -38,11 +42,13 @@ Full documentation covering all deployment scenarios with detailed explanations.
 ---
 
 ### 3. [PRISMA_SCHEMA.sql](./PRISMA_SCHEMA.sql) 📝
+
 **Standalone SQL file for manual deployment**
 
 Ready-to-use SQL that can be copied directly into Supabase SQL Editor.
 
 **Contains:**
+
 - Complete SQL DDL statements
 - All 7 table definitions
 - Role enum definition
@@ -52,6 +58,7 @@ Ready-to-use SQL that can be copied directly into Supabase SQL Editor.
 **Best for:** When you cannot run `npx prisma db push` or prefer SQL
 
 **How to use:**
+
 1. Open Supabase Dashboard → SQL Editor
 2. Copy entire file content
 3. Paste into SQL Editor
@@ -60,11 +67,13 @@ Ready-to-use SQL that can be copied directly into Supabase SQL Editor.
 ---
 
 ### 4. [PRISMA_DEPLOYMENT_SUMMARY.md](./PRISMA_DEPLOYMENT_SUMMARY.md) 📊
+
 **Executive summary and quick reference**
 
 High-level overview with answers to common questions.
 
 **Contains:**
+
 - Validation status
 - Key findings
 - Summary of all deployment options
@@ -143,15 +152,15 @@ Before deploying, ensure you have:
 
 Your schema includes:
 
-| Table | Purpose | Key Features |
-|-------|---------|--------------|
-| `role_permissions` | Role-based access control | Maps roles to route scopes |
-| `users` | User accounts | Email/password auth, roles |
-| `coach_profiles` | Coach-specific data | Templates, profile completion |
-| `portal_templates` | Reusable templates | Document structures |
-| `client_profiles` | Client-specific data | Personalized documents |
-| `progress` | Progress tracking | Phase tracking, photos |
-| `messages` | Messaging system | Coach-client communication |
+| Table              | Purpose                   | Key Features                  |
+| ------------------ | ------------------------- | ----------------------------- |
+| `role_permissions` | Role-based access control | Maps roles to route scopes    |
+| `users`            | User accounts             | Email/password auth, roles    |
+| `coach_profiles`   | Coach-specific data       | Templates, profile completion |
+| `portal_templates` | Reusable templates        | Document structures           |
+| `client_profiles`  | Client-specific data      | Personalized documents        |
+| `progress`         | Progress tracking         | Phase tracking, photos        |
+| `messages`         | Messaging system          | Coach-client communication    |
 
 ## 🔗 Related Documentation
 

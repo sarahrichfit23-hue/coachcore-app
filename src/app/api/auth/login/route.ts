@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSupabaseClient } from "@/lib/supabase";
 import { type AppRole, signAuthToken, buildAuthCookie } from "@/lib/auth/token";
-import bcrypt from "bcrypt";
 
 function toAppRole(role: string): AppRole | null {
   const normalized = role.toUpperCase();
@@ -23,14 +22,12 @@ export async function POST(request: NextRequest) {
     const password = body?.password as string | undefined;
 
     if (!email || !password) {
-      console.warn("Login attempt with missing credentials");
       return NextResponse.json(
         { success: false, error: "Email and password are required" },
         { status: 400 },
       );
     }
 
-    // Authenticate with Supabase Auth (handles password hashing)
     const supabase = getSupabaseClient();
     if (!supabase) {
       return NextResponse.json(
@@ -44,101 +41,67 @@ export async function POST(request: NextRequest) {
       password,
     });
 
-    // Optional dev-only fallback: allow local password check if Supabase auth fails
     if (error || !data?.user) {
-      const allowLocal = process.env.ALLOW_LOCAL_PASSWORD_DEV === "true";
-      if (!allowLocal) {
-        console.warn("Supabase auth failed for:", email, error?.message);
-        return NextResponse.json(
-          { success: false, error: "Invalid credentials" },
-          { status: 401 },
-        );
-      }
-    }
-
-    // Look up app-specific user record for role and flags
-    let user;
-    try {
-      user = await prisma.user.findUnique({ where: { email } });
-    } catch (dbError) {
-      console.error("Database error during app user lookup:", dbError);
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Database connection error. Please try again.",
-        },
-        { status: 503 },
-      );
-    }
-
-    if (!user || !user.isActive) {
-      console.warn("Login attempt for invalid/inactive app user:", email);
+      // Single source of truth: Supabase Auth
       return NextResponse.json(
         { success: false, error: "Invalid credentials" },
         { status: 401 },
       );
     }
 
-    // If Supabase auth failed but dev fallback is enabled, verify password against local hash
-    if (
-      (error || !data?.user) &&
-      process.env.ALLOW_LOCAL_PASSWORD_DEV === "true"
-    ) {
-      const ok = await bcrypt.compare(password, user.password);
-      if (!ok) {
-        return NextResponse.json(
-          { success: false, error: "Invalid credentials" },
-          { status: 401 },
-        );
-      }
+    // Ensure an app user record exists
+    let user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          email,
+          // Default to CLIENT role for auto-provisioned users
+          // IMPORTANT: For ADMIN or COACH roles, users must be explicitly created via admin routes
+          role: "CLIENT",
+          isActive: true,
+          isPasswordChanged: false, // Will be set to true after first password change
+          name:
+            data.user.user_metadata?.full_name ??
+            data.user.email ??
+            "Unnamed User",
+          avatarUrl: data.user.user_metadata?.avatar_url ?? null,
+          // IMPORTANT: do not set or require password here
+        },
+      });
+    }
+
+    if (!user.isActive) {
+      return NextResponse.json(
+        { success: false, error: "Account is inactive" },
+        { status: 403 },
+      );
     }
 
     const role = toAppRole(user.role);
 
     if (!role) {
-      console.error(
-        "User has unsupported role:",
-        user.role,
-        "for user:",
-        email,
-      );
       return NextResponse.json(
         { success: false, error: "User role is not supported" },
         { status: 403 },
       );
     }
 
-    // Sign JWT token
-    let token;
-    try {
-      token = await signAuthToken({
-        userId: user.id,
-        role,
-        isPasswordChanged: user.isPasswordChanged,
-        name: user.name,
-        email: user.email,
-        avatarUrl: user.avatarUrl,
-      });
-    } catch (tokenError) {
-      console.error("Failed to sign auth token:", tokenError);
-      return NextResponse.json(
-        { success: false, error: "Authentication token generation failed" },
-        { status: 500 },
-      );
-    }
+    const token = await signAuthToken({
+      userId: user.id,
+      role,
+      isPasswordChanged: user.isPasswordChanged,
+      name: user.name,
+      email: user.email,
+      avatarUrl: user.avatarUrl,
+    });
 
     const response = NextResponse.json({
       success: true,
-      data: {
-        id: user.id,
-        role,
-        isPasswordChanged: user.isPasswordChanged,
-      },
+      data: { id: user.id, role, isPasswordChanged: user.isPasswordChanged },
     });
 
     response.cookies.set(buildAuthCookie(token));
-
-    console.log("Successful Supabase login for user:", email, "role:", role);
 
     return response;
   } catch (error) {

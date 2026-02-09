@@ -53,13 +53,7 @@ CORS (Cross-Origin Resource Sharing) must be configured to allow your web applic
       "https://your-production-domain.com",
       "https://*.vercel.app"
     ],
-    "AllowedMethods": [
-      "GET",
-      "PUT",
-      "POST",
-      "DELETE",
-      "HEAD"
-    ],
+    "AllowedMethods": ["GET", "PUT", "POST", "DELETE", "HEAD"],
     "AllowedHeaders": ["*"],
     "ExposeHeaders": ["ETag"],
     "MaxAgeSeconds": 3600
@@ -106,6 +100,7 @@ R2_CUSTOM_DOMAIN=cdn.yourdomain.com
 **Replace the placeholder values with your actual values from steps 2 and 4.**
 
 **Note about R2_CUSTOM_DOMAIN:**
+
 - Only set this if you're using a custom domain for your R2 bucket (Option B from Step 2)
 - Use just the hostname without `https://` (e.g., `cdn.yourdomain.com`)
 - This is used for Next.js image optimization security
@@ -114,6 +109,7 @@ R2_CUSTOM_DOMAIN=cdn.yourdomain.com
 ## Step 6: Verify Configuration
 
 1. Restart your development server:
+
    ```bash
    npm run dev
    ```

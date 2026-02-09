@@ -12,6 +12,7 @@ npm run dev
 ```
 
 **Detailed Help:**
+
 - **Quick Reference:** [QUICK_FIX.md](./QUICK_FIX.md) ⭐ Start here!
 - **Complete Guide:** [docs/LOGIN_FIX.md](./docs/LOGIN_FIX.md)
 - **Troubleshooting:** [docs/TROUBLESHOOTING.md](./docs/TROUBLESHOOTING.md)
@@ -145,6 +146,7 @@ bash scripts/setup.sh
 ```
 
 This script will:
+
 - Restore the `.env` file from backup
 - Install dependencies
 - Verify environment configuration
@@ -188,6 +190,7 @@ Add these in a local `.env` and in Vercel project settings:
 ### Database Setup
 
 For detailed instructions on deploying your Prisma schema to Supabase:
+
 - **Quick Start**: [docs/PRISMA_QUICK_START.md](./docs/PRISMA_QUICK_START.md) - TL;DR version
 - **Complete Guide**: [docs/PRISMA_DEPLOYMENT_GUIDE.md](./docs/PRISMA_DEPLOYMENT_GUIDE.md) - Full documentation
 
@@ -198,6 +201,7 @@ For detailed instructions on deploying your Prisma schema to Supabase:
 See the detailed setup guide: **[docs/R2_SETUP.md](./docs/R2_SETUP.md)**
 
 Key requirements:
+
 - Enable public access on your R2 bucket
 - Configure CORS to allow your application domain
 - Set up API tokens with read/write permissions
@@ -227,6 +231,7 @@ To allow the application to load images from Cloudflare R2, you need to configur
 ```
 
 **Important Notes:**
+
 - Replace `https://your-production-domain.com` with your actual production URL
 - For development, include `http://localhost:3000`
 - For Vercel deployments, also add your Vercel preview URLs (e.g., `https://*.vercel.app`)
@@ -240,6 +245,7 @@ Ensure your R2 bucket has a public domain configured:
 3. Copy the public URL and set it as `R2_PUBLIC_URL` in your `.env` file
 
 Example:
+
 ```
 R2_PUBLIC_URL=https://pub-xxxxxxxxxxxxx.r2.dev
 ```
@@ -251,6 +257,7 @@ If you encounter issues with database connections, authentication, or environmen
 ### Quick Fixes
 
 **Cannot login / Database connection error:**
+
 ```bash
 # Restore .env file
 cp .env.bak .env  # or cp .env.example .env
@@ -274,21 +281,25 @@ If you encounter the error **"Database connection error. Please try again."** wh
 **Cause**: The `.env` file is missing or not properly configured.
 
 **Solution**:
+
 1. Check if the `.env` file exists in the project root:
+
    ```bash
    ls -la .env
    ```
 
 2. If missing, create it from the backup or example:
+
    ```bash
    # If you have a backup:
    cp .env.bak .env
-   
+
    # Or create from the example:
    cp .env.example .env
    ```
 
 3. Edit the `.env` file and ensure these critical variables are set:
+
    ```
    DATABASE_URL=postgresql://...
    DIRECT_URL=postgresql://...
@@ -301,8 +312,8 @@ If you encounter the error **"Database connection error. Please try again."** wh
    ```bash
    npm run check-env
    ```
-   
 5. The Prisma client should automatically regenerate when you install dependencies:
+
    ```bash
    npm install
    ```

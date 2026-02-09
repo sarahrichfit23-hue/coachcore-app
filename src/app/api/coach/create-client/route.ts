@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { hashPassword, generateSystemPassword } from "@/lib/auth/password";
+import { getSupabaseAdminClient } from "@/lib/supabase";
 import { verifyAuthToken } from "@/lib/auth/token";
+import { buildPasswordResetUrl } from "@/lib/auth/utils";
 import {
   cloneTemplateWithNewPageIds,
   DEFAULT_DOCUMENT_TEMPLATE,
   isValidDocumentTemplate,
 } from "@/lib/document-template";
-import { sendEmail, getEmailConfig } from "@/lib/email/sendEmail";
-import { renderOnboardingTemplate } from "@/lib/email/templates";
 import { Prisma } from "@prisma/client";
 import { type DocumentTemplate } from "@/types";
 
@@ -130,8 +129,32 @@ export async function POST(request: NextRequest) {
 
     const clientDocument = cloneTemplateWithNewPageIds(templateToUse);
 
-    const rawPassword = generateSystemPassword();
-    const hashedPassword = await hashPassword(rawPassword);
+    // Create user in Supabase Auth
+    const supabase = getSupabaseAdminClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { success: false, error: "Auth provider not configured" },
+        { status: 500 },
+      );
+    }
+
+    // Create user in Supabase Auth and send email invite
+    const { data: authUser, error: authError } =
+      await supabase.auth.admin.createUser({
+        email,
+        email_confirm: true,
+        user_metadata: {
+          full_name: name,
+        },
+      });
+
+    if (authError || !authUser?.user) {
+      console.error("Failed to create user in Supabase Auth:", authError);
+      return NextResponse.json(
+        { success: false, error: "Failed to create authentication account" },
+        { status: 500 },
+      );
+    }
 
     await prisma.$transaction(
       async (tx) => {
@@ -139,7 +162,6 @@ export async function POST(request: NextRequest) {
           data: {
             name,
             email,
-            password: hashedPassword,
             role: "CLIENT",
             isPasswordChanged: false,
             isActive: true,
@@ -170,46 +192,21 @@ export async function POST(request: NextRequest) {
       },
     );
 
-    const emailConfig = getEmailConfig();
-    if (!emailConfig.success) {
-      return NextResponse.json(
-        { success: false, error: emailConfig.error },
-        { status: 500 },
-      );
-    }
+    // Send password reset email
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(
+      email,
+      {
+        redirectTo: buildPasswordResetUrl(request),
+      },
+    );
 
-    const onboardingUrl = new URL("/login", request.url).toString();
-    const compiledTemplate = await renderOnboardingTemplate({
-      clientName: name,
-      clientEmail: email,
-      tempPassword: rawPassword,
-      setPasswordUrl: onboardingUrl,
-      platformName: emailConfig.data.platformName,
-    });
-
-    if (!compiledTemplate.success) {
-      return NextResponse.json(
-        { success: false, error: compiledTemplate.error },
-        { status: 500 },
-      );
-    }
-
-    const emailResult = await sendEmail({
-      to: email,
-      subject: `${emailConfig.data.platformName} | Complete your onboarding`,
-      html: compiledTemplate.data,
-      config: emailConfig.data,
-    });
-
-    if (!emailResult.success) {
-      return NextResponse.json(
-        { success: false, error: emailResult.error },
-        { status: 500 },
-      );
+    if (resetError) {
+      console.warn("Failed to send password reset email:", resetError);
+      // Don't fail the request - user was created successfully
     }
 
     return NextResponse.json(
-      { success: true, message: "Credentials sent to email" },
+      { success: true, message: "Client created. Password reset email sent." },
       { status: 201 },
     );
   } catch (error) {
