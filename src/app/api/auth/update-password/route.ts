@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { getSupabaseClient } from "@/lib/supabase";
 import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/auth/password";
@@ -145,6 +146,22 @@ export async function POST(request: NextRequest) {
         },
       });
 
+      if (!existingUser) {
+        console.warn("Password reset for missing app user:", normalizedEmail);
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              "We couldn't find your account in our database. Please contact support.",
+          },
+          { status: 404 },
+        );
+      }
+
+      // Update password hash in our database
+      const hashedPassword = await hashPassword(newPassword);
+      const user = await updatePasswordWithRetry(existingUser.id, hashedPassword);
+
       return NextResponse.json(
         {
           success: true,
@@ -156,7 +173,11 @@ export async function POST(request: NextRequest) {
         { status: 200 },
       );
     } catch (dbError) {
-      console.error("Database update error:", dbError);
+      const prismaError =
+        dbError instanceof Prisma.PrismaClientKnownRequestError
+          ? { code: dbError.code, message: dbError.message }
+          : undefined;
+      console.error("Database update error:", { dbError, prismaError });
       return NextResponse.json(
         {
           success: false,
@@ -173,4 +194,40 @@ export async function POST(request: NextRequest) {
       { status: 500 },
     );
   }
+}
+
+async function updatePasswordWithRetry(userId: string, hashedPassword: string) {
+  const maxAttempts = 3;
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      return await prisma.user.update({
+        where: { id: userId },
+        data: {
+          password: hashedPassword,
+          isPasswordChanged: true,
+        },
+        select: {
+          id: true,
+          email: true,
+          role: true,
+        },
+      });
+    } catch (error) {
+      lastError = error;
+
+      const retryable =
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        ["P1001", "P1002", "P1003", "P1017"].includes(error.code);
+
+      if (!retryable || attempt === maxAttempts) {
+        break;
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, attempt * 200));
+    }
+  }
+
+  throw lastError;
 }
