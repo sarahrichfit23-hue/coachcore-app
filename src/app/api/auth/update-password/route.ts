@@ -167,13 +167,12 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function updatePasswordWithRetry(userId: string, newPassword: string) {
+async function updatePasswordWithRetry(userId: string, hashedPassword: string) {
   const maxAttempts = 3;
   let lastError: unknown;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     try {
-      const hashedPassword = await hashPassword(newPassword);
       return await prisma.user.update({
         where: { id: userId },
         data: {
