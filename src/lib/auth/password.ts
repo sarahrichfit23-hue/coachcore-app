@@ -1,5 +1,11 @@
 import bcrypt from "bcrypt";
 
+// ============================================================
+// DEPRECATED: These functions are no longer used.
+// Authentication now uses Supabase Auth exclusively.
+// This file is kept for reference only and can be removed.
+// ============================================================
+
 const SALT_ROUNDS = 12;
 
 /**
