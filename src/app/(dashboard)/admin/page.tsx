@@ -139,7 +139,7 @@ export default function AdminDashboardPage() {
 
   const [coachDeleteTarget, setCoachDeleteTarget] = useState<AdminCoach | null>(
     // eslint-disable-next-line prettier/prettier
-    null
+    null,
   );
   const [clientDeleteTarget, setClientDeleteTarget] =
     useState<AdminClient | null>(null);

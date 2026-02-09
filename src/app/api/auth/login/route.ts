@@ -56,11 +56,15 @@ export async function POST(request: NextRequest) {
       user = await prisma.user.create({
         data: {
           email,
-          // Choose a default role that makes sense for your app
-          role: "CLIENT", // or "ADMIN" / "COACH"
+          // Default to CLIENT role for auto-provisioned users
+          // IMPORTANT: For ADMIN or COACH roles, users must be explicitly created via admin routes
+          role: "CLIENT",
           isActive: true,
-          isPasswordChanged: false, // optional flag if your app uses it
-          name: data.user.user_metadata?.full_name ?? data.user.email ?? "",
+          isPasswordChanged: false, // Will be set to true after first password change
+          name:
+            data.user.user_metadata?.full_name ??
+            data.user.email ??
+            "Unnamed User",
           avatarUrl: data.user.user_metadata?.avatar_url ?? null,
           // IMPORTANT: do not set or require password here
         },

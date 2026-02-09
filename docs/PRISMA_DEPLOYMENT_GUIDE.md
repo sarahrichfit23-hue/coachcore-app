@@ -9,8 +9,9 @@ The schema has been validated using Prisma CLI v6.19.0 and contains no syntax er
 ## 📋 Schema Overview
 
 Your Prisma schema includes:
+
 - **1 Enum**: Role (ADMIN, COACH, CLIENT)
-- **7 Tables**: 
+- **7 Tables**:
   - `role_permissions` - Role-based permissions
   - `users` - User accounts
   - `coach_profiles` - Coach-specific data
@@ -26,6 +27,7 @@ Your Prisma schema includes:
 This is the **easiest and recommended** approach.
 
 ### Prerequisites
+
 1. ✅ You already have Prisma installed (v6.19.0 in package.json)
 2. ✅ Your `DATABASE_URL` is configured to point to Supabase
 3. ✅ Your schema is valid
@@ -48,6 +50,7 @@ npx prisma db push
 ```
 
 ### What `npx prisma db push` Does
+
 - Reads your `prisma/schema.prisma` file
 - Connects to your database using `DATABASE_URL`
 - Creates/updates tables, enums, indexes, and relationships
@@ -55,11 +58,13 @@ npx prisma db push
 - Safe to run multiple times (idempotent)
 
 ### When to Run Locally
+
 - ✅ **Development**: Run locally during development when you change the schema
 - ✅ **First Time Setup**: Run once to initialize your Supabase database
 - ✅ **Quick Prototyping**: Ideal for MVP/rapid development
 
 ### Troubleshooting
+
 If you encounter issues:
 
 ```bash
@@ -93,6 +98,7 @@ Add to your build command in `package.json`:
 ```
 
 Or in Vercel project settings:
+
 - Build Command: `npx prisma db push && npm run build`
 - Install Command: `npm install`
 
@@ -109,7 +115,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'prisma/schema.prisma'
+      - "prisma/schema.prisma"
 
 jobs:
   deploy:
@@ -118,7 +124,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: "20"
       - run: npm install
       - run: npx prisma db push
         env:
@@ -279,36 +285,38 @@ CREATE INDEX "messages_receiverId_createdAt_idx" ON "messages"("receiverId", "cr
 CREATE INDEX "messages_receiverId_isRead_idx" ON "messages"("receiverId", "isRead");
 
 -- AddForeignKey
-ALTER TABLE "coach_profiles" ADD CONSTRAINT "coach_profiles_userId_fkey" 
+ALTER TABLE "coach_profiles" ADD CONSTRAINT "coach_profiles_userId_fkey"
     FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
-ALTER TABLE "portal_templates" ADD CONSTRAINT "portal_templates_coachId_fkey" 
+ALTER TABLE "portal_templates" ADD CONSTRAINT "portal_templates_coachId_fkey"
     FOREIGN KEY ("coachId") REFERENCES "coach_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
-ALTER TABLE "client_profiles" ADD CONSTRAINT "client_profiles_userId_fkey" 
+ALTER TABLE "client_profiles" ADD CONSTRAINT "client_profiles_userId_fkey"
     FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
-ALTER TABLE "client_profiles" ADD CONSTRAINT "client_profiles_coachId_fkey" 
+ALTER TABLE "client_profiles" ADD CONSTRAINT "client_profiles_coachId_fkey"
     FOREIGN KEY ("coachId") REFERENCES "coach_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
-ALTER TABLE "progress" ADD CONSTRAINT "progress_clientProfileId_fkey" 
+ALTER TABLE "progress" ADD CONSTRAINT "progress_clientProfileId_fkey"
     FOREIGN KEY ("clientProfileId") REFERENCES "client_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
-ALTER TABLE "messages" ADD CONSTRAINT "messages_senderId_fkey" 
+ALTER TABLE "messages" ADD CONSTRAINT "messages_senderId_fkey"
     FOREIGN KEY ("senderId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
-ALTER TABLE "messages" ADD CONSTRAINT "messages_receiverId_fkey" 
+ALTER TABLE "messages" ADD CONSTRAINT "messages_receiverId_fkey"
     FOREIGN KEY ("receiverId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ```
 
 ### Verifying Manual SQL Execution
 
 After running the SQL, verify in Supabase:
+
 1. Go to **Table Editor** in Supabase dashboard
 2. You should see all 7 tables listed
 3. Check table structure matches your schema
 
 Then in your app:
+
 ```bash
 # Generate Prisma Client to match your database
 npx prisma generate
@@ -319,14 +327,14 @@ npm run dev
 
 ## 🔍 Comparison: `prisma db push` vs Manual SQL
 
-| Feature | `npx prisma db push` | Manual SQL in Supabase |
-|---------|----------------------|------------------------|
-| Ease of use | ✅ Very easy | ⚠️ Requires SQL knowledge |
-| Accuracy | ✅ 100% accurate | ⚠️ Risk of copy-paste errors |
-| Future updates | ✅ Easy to re-run | ❌ Must regenerate SQL each time |
-| Migration history | ❌ No history | ❌ No history |
-| Prisma Client sync | ✅ Automatic | ⚠️ Must run `prisma generate` manually |
-| **Recommendation** | ⭐ **RECOMMENDED** | Use only if push fails |
+| Feature            | `npx prisma db push` | Manual SQL in Supabase                 |
+| ------------------ | -------------------- | -------------------------------------- |
+| Ease of use        | ✅ Very easy         | ⚠️ Requires SQL knowledge              |
+| Accuracy           | ✅ 100% accurate     | ⚠️ Risk of copy-paste errors           |
+| Future updates     | ✅ Easy to re-run    | ❌ Must regenerate SQL each time       |
+| Migration history  | ❌ No history        | ❌ No history                          |
+| Prisma Client sync | ✅ Automatic         | ⚠️ Must run `prisma generate` manually |
+| **Recommendation** | ⭐ **RECOMMENDED**   | Use only if push fails                 |
 
 ## 📚 Additional Resources
 
@@ -362,9 +370,10 @@ npx prisma format
 
 ### Security Note
 
-⚠️ **Never commit your `.env` file to Git!** 
+⚠️ **Never commit your `.env` file to Git!**
 
 Your `.gitignore` should already include:
+
 ```
 .env
 .env.local
@@ -385,7 +394,8 @@ Your `.gitignore` should already include:
 A: Yes, every time you change `prisma/schema.prisma`, you should run `npx prisma db push` to sync the changes to your database.
 
 **Q: What's the difference between `db push` and `migrate`?**
-A: 
+A:
+
 - `db push` is for rapid development, no migration history
 - `migrate` creates versioned migration files, better for production
 - For MVP/early stage, `db push` is perfect
@@ -398,6 +408,7 @@ A: Yes! Just run `npx prisma studio` and it will open a GUI to view/edit your Su
 
 **Q: My DATABASE_URL is not working**
 A: Common issues:
+
 - Wrong password (check Supabase dashboard)
 - Wrong project reference
 - Missing `postgres` at the end of URL

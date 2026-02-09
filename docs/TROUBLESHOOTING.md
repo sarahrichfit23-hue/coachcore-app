@@ -14,12 +14,15 @@ This guide covers common issues and their solutions for the Coach Core applicati
 ## Cannot Login - Database Connection Error
 
 ### Symptoms
+
 - Cannot log in as any user (Admin, Coach, or Client)
 - Error message: "Database connection error. Please try again."
 - Application fails to start or crashes during authentication
 
 ### Root Cause
+
 The `.env` file is missing or not properly configured. Without this file, the application cannot:
+
 - Connect to the PostgreSQL database
 - Initialize Supabase authentication
 - Generate Prisma client properly
@@ -27,11 +30,13 @@ The `.env` file is missing or not properly configured. Without this file, the ap
 ### Solution
 
 **Step 1: Check if `.env` file exists**
+
 ```bash
 ls -la .env
 ```
 
 **Step 2: If missing, restore from backup**
+
 ```bash
 # Option A: Restore from backup (if available)
 cp .env.bak .env
@@ -42,16 +47,19 @@ cp .env.example .env
 ```
 
 **Step 3: Verify environment variables**
+
 ```bash
 npm run check-env
 ```
 
 **Step 4: Reinstall dependencies to regenerate Prisma client**
+
 ```bash
 npm install
 ```
 
 **Step 5: Start the application**
+
 ```bash
 npm run dev
 ```
@@ -61,9 +69,11 @@ npm run dev
 ## Port 6543 / PgBouncer Issues
 
 ### Background
+
 Supabase has deprecated port 6543 (PgBouncer pooler). All connections should now use port 5432 directly.
 
 ### Symptoms
+
 - Connection errors mentioning port 6543
 - "Can't reach database server" errors
 - Authentication failures
@@ -86,6 +96,7 @@ DIRECT_URL=postgresql://postgres:password@host:5432/postgres?sslmode=require
 ### Verify the Fix
 
 Run the environment checker:
+
 ```bash
 npm run check-env
 ```
@@ -135,6 +146,7 @@ R2_BUCKET_NAME=<your-bucket>
 ### Generating a JWT Secret
 
 Generate a secure JWT secret with:
+
 ```bash
 openssl rand -hex 32
 ```
@@ -144,6 +156,7 @@ openssl rand -hex 32
 ## Quick Fixes
 
 ### Reset Everything
+
 If you're completely stuck, try this reset procedure:
 
 ```bash
@@ -167,6 +180,7 @@ npm run dev
 ### Common Checklist
 
 Before reporting an issue, verify:
+
 - [ ] `.env` file exists in the project root
 - [ ] All required environment variables are set
 - [ ] Database URLs use port 5432 (not 6543)
@@ -191,6 +205,7 @@ If you're still stuck after trying these solutions:
 To prevent these issues in the future:
 
 1. **Always backup your `.env` file** before making changes:
+
    ```bash
    cp .env .env.bak
    ```
@@ -206,6 +221,7 @@ To prevent these issues in the future:
    - When setting up a new environment
 
 4. **Keep dependencies updated**:
+
    ```bash
    npm install
    npm run prisma:generate

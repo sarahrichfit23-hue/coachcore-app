@@ -16,7 +16,7 @@ npx prisma db push
 ✅ Creates the Role enum (ADMIN, COACH, CLIENT)  
 ✅ Sets up all foreign key relationships  
 ✅ Creates all indexes for performance  
-✅ Ready to use with your Next.js app  
+✅ Ready to use with your Next.js app
 
 ## Quick Commands Reference
 
@@ -46,7 +46,7 @@ See the full guide: [PRISMA_DEPLOYMENT_GUIDE.md](./PRISMA_DEPLOYMENT_GUIDE.md)
 ✅ **Schema is VALID**  
 ✅ **Ready to deploy**  
 ✅ **Contains 7 tables + 1 enum**  
-✅ **All relationships configured correctly**  
+✅ **All relationships configured correctly**
 
 ## Environment Setup
 

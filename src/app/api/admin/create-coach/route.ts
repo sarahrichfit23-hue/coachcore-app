@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSupabaseAdminClient } from "@/lib/supabase";
 import { verifyAuthToken } from "@/lib/auth/token";
+import { buildPasswordResetUrl } from "@/lib/auth/utils";
 import { createDocumentTemplateWithIds } from "@/lib/document-template";
 import { Prisma } from "@prisma/client";
 
@@ -63,13 +64,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Create user in Supabase Auth and send email invite
-    const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
-      email,
-      email_confirm: true,
-      user_metadata: {
-        full_name: name,
-      },
-    });
+    const { data: authUser, error: authError } =
+      await supabase.auth.admin.createUser({
+        email,
+        email_confirm: true,
+        user_metadata: {
+          full_name: name,
+        },
+      });
 
     if (authError || !authUser?.user) {
       console.error("Failed to create user in Supabase Auth:", authError);
@@ -106,9 +108,12 @@ export async function POST(request: NextRequest) {
     );
 
     // Send password reset email
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin}/reset-password`,
-    });
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(
+      email,
+      {
+        redirectTo: buildPasswordResetUrl(request),
+      },
+    );
 
     if (resetError) {
       console.warn("Failed to send password reset email:", resetError);

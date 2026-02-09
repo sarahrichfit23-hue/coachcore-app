@@ -24,14 +24,17 @@ Over the past few days, there was confusion about Supabase's deprecation of port
 ## The Port 6543 Confusion Explained
 
 ### Background
+
 - Supabase previously recommended using port 6543 with PgBouncer for serverless environments
 - They have since deprecated this approach
 - **All connections should now use port 5432 directly**
 
 ### What Changed in the Codebase
+
 The application code (`src/lib/db/prisma.ts`) already includes automatic fix logic that converts port 6543 → 5432 if detected. However, this auto-fix only works **if the `.env` file exists in the first place**.
 
 ### Current State
+
 - ✅ `.env.bak` backup exists with correct configuration (port 5432)
 - ✅ `.env.example` updated to show port 5432
 - ✅ Auto-fix logic in place for legacy configurations
@@ -55,6 +58,7 @@ npm run dev
 ```
 
 The script will automatically:
+
 - Restore `.env` from backup
 - Verify all required variables
 - Install dependencies
@@ -63,16 +67,19 @@ The script will automatically:
 ### Option 2: Manual Setup
 
 **Step 1: Restore the `.env` file**
+
 ```bash
 cp .env.bak .env
 ```
 
 **Step 2: Verify environment variables**
+
 ```bash
 npm run check-env
 ```
 
 You should see:
+
 ```
 ✓ .env file exists
 ✓ DATABASE_URL - PostgreSQL connection string
@@ -84,6 +91,7 @@ You should see:
 ```
 
 **Step 3: Install dependencies (if needed)**
+
 ```bash
 npm install
 ```
@@ -91,11 +99,13 @@ npm install
 This will also regenerate the Prisma Client with the correct database configuration.
 
 **Step 4: Start the application**
+
 ```bash
 npm run dev
 ```
 
 **Step 5: Test login**
+
 - Navigate to `http://localhost:3000/login`
 - Try logging in with valid credentials
 - Login should now work successfully
@@ -127,10 +137,11 @@ If deploying to Vercel or another platform:
    - Ensure DATABASE_URL and DIRECT_URL use port 5432
 
 2. **For Vercel specifically:**
+
    ```
    Settings → Environment Variables → Add
    ```
-   
+
    Add each variable:
    - `DATABASE_URL`
    - `DIRECT_URL`
@@ -158,11 +169,11 @@ The `.env` file is **intentionally excluded from git** for security reasons. Thi
 
 ### Files in the Repository
 
-| File | Purpose | In Git? |
-|------|---------|---------|
-| `.env` | Active environment variables | ❌ No (excluded) |
-| `.env.bak` | Backup of working configuration | ✅ Yes |
-| `.env.example` | Template with placeholders | ✅ Yes |
+| File           | Purpose                         | In Git?          |
+| -------------- | ------------------------------- | ---------------- |
+| `.env`         | Active environment variables    | ❌ No (excluded) |
+| `.env.bak`     | Backup of working configuration | ✅ Yes           |
+| `.env.example` | Template with placeholders      | ✅ Yes           |
 
 ---
 
@@ -171,6 +182,7 @@ The `.env` file is **intentionally excluded from git** for security reasons. Thi
 To avoid this issue in the future:
 
 1. **Always backup before making changes:**
+
    ```bash
    cp .env .env.bak
    git add .env.bak
@@ -178,11 +190,13 @@ To avoid this issue in the future:
    ```
 
 2. **Use the environment checker regularly:**
+
    ```bash
    npm run check-env
    ```
 
 3. **Keep the setup script handy:**
+
    ```bash
    bash scripts/setup.sh --force
    ```
@@ -202,22 +216,29 @@ To avoid this issue in the future:
 ## Common Questions
 
 ### Q: Why did the AI assistant keep changing the configuration?
+
 **A:** There was confusion about whether to use port 6543 or 5432. The fix kept alternating between the two, when the real issue was the missing `.env` file itself.
 
 ### Q: Is port 5432 definitely correct?
+
 **A:** Yes. Supabase has deprecated port 6543. All new projects should use port 5432 for direct connections.
 
 ### Q: Do I need PgBouncer parameters?
+
 **A:** No. Remove `pgbouncer=true` and `connection_limit=1` from your connection strings. Use plain port 5432 connections.
 
 ### Q: What if I don't have `.env.bak`?
+
 **A:** Use `.env.example` as a template and fill in your actual credentials from your Supabase dashboard.
 
 ### Q: Will this fix work for everyone?
+
 **A:** Yes, if you have the correct credentials. The `.env.bak` in this repository contains valid production credentials that should work.
 
 ### Q: What if it still doesn't work?
+
 **A:** See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) for advanced debugging steps, or:
+
 1. Verify your Supabase project is active
 2. Check database credentials in Supabase dashboard
 3. Ensure your IP isn't blocked

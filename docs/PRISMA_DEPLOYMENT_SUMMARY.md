@@ -7,6 +7,7 @@
 ✅ **Generated SQL Equivalent**: Created standalone SQL file that can be run directly in Supabase SQL Editor
 
 ✅ **Created Comprehensive Documentation**:
+
 - Full deployment guide with 3 deployment options
 - Quick start guide for immediate use
 - Standalone SQL file for manual deployment
@@ -18,6 +19,7 @@
 Your `prisma/schema.prisma` file is **100% valid** and ready to deploy to Supabase.
 
 **Schema Contains:**
+
 - 1 Enum: `Role` (ADMIN, COACH, CLIENT)
 - 7 Tables with proper relationships and indexes
 - Optimized indexes for query performance
@@ -62,6 +64,7 @@ Run the generated SQL directly in Supabase SQL Editor.
 ### 2. Where do I need to run `npx prisma db push`?
 
 You should run it **locally** on your development machine:
+
 - Open terminal in your project directory
 - Ensure `.env` file has `DATABASE_URL` set to your Supabase connection string
 - Run: `npx prisma db push`
@@ -74,12 +77,14 @@ You can also run it in CI/CD if you set up automated deployments.
 If you cannot run `npx prisma db push`, you have two alternatives:
 
 **Option A:** Use the generated SQL file
+
 - File location: `docs/PRISMA_SCHEMA.sql`
 - Open Supabase Dashboard → SQL Editor
 - Copy and paste the entire SQL file
 - Click RUN
 
 **Option B:** Ask someone with Node.js/npm installed to run it for you
+
 - They just need your `DATABASE_URL` connection string
 - They run: `DATABASE_URL="your-connection-string" npx prisma db push`
 
@@ -88,6 +93,7 @@ If you cannot run `npx prisma db push`, you have two alternatives:
 ✅ **YES** - Absolutely! The SQL file in `docs/PRISMA_SCHEMA.sql` is specifically for this purpose.
 
 After running the SQL manually:
+
 - All tables, indexes, and relationships will be created correctly
 - Prisma Client will work perfectly with the database
 - You'll need to run `npx prisma generate` once to generate the client
@@ -97,6 +103,7 @@ After running the SQL manually:
 ✅ **YES** - Full SQL equivalent is available in `docs/PRISMA_SCHEMA.sql`
 
 The SQL is production-ready and includes:
+
 - All table definitions
 - All indexes (for query performance)
 - All foreign key constraints
@@ -133,15 +140,16 @@ Your project already has these helpful scripts:
 
 ```json
 {
-  "prisma:generate": "prisma generate",     // Generate Prisma Client
-  "prisma:push": "prisma db push",          // Push schema to database
-  "prisma:studio": "prisma studio",         // Open database GUI
-  "prisma:migrate": "prisma migrate dev",   // Create migration files
-  "seed": "pnpm prisma db seed"             // Seed database
+  "prisma:generate": "prisma generate", // Generate Prisma Client
+  "prisma:push": "prisma db push", // Push schema to database
+  "prisma:studio": "prisma studio", // Open database GUI
+  "prisma:migrate": "prisma migrate dev", // Create migration files
+  "seed": "pnpm prisma db seed" // Seed database
 }
 ```
 
 You can run them with:
+
 - `npm run prisma:push` (same as `npx prisma db push`)
 - `npm run prisma:studio` (open database viewer)
 
@@ -154,6 +162,7 @@ DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@[PROJECT-REF].supabase.co:54
 ```
 
 Get this from:
+
 - Supabase Dashboard
 - Project Settings → Database
 - Connection String → URI
