@@ -41,6 +41,13 @@ export async function POST(request: NextRequest) {
       password,
     });
 
+    // Debug: verify Supabase Auth result
+    console.log("auth result", {
+      ok: !error && !!data?.user,
+      uid: data?.user?.id,
+      email,
+    });
+
     if (error || !data?.user) {
       // Single source of truth: Supabase Auth
       return NextResponse.json(
@@ -50,9 +57,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Ensure an app user record exists
+    console.log("lookup app user", email);
     let user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) {
+      console.log("creating app user", email);
       user = await prisma.user.create({
         data: {
           email,
@@ -70,6 +79,9 @@ export async function POST(request: NextRequest) {
         },
       });
     }
+
+    // Debug: confirm user is ready
+    console.log("app user ready", { id: user.id, role: user.role });
 
     if (!user.isActive) {
       return NextResponse.json(
