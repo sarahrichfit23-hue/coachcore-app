@@ -111,11 +111,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Update password hash in our database
-    const hashedPassword = await hashPassword(newPassword);
     try {
+      const normalizedEmail = email.toLowerCase().trim();
+      const existingUser = await prisma.user.findUnique({
+        where: { email: normalizedEmail },
+        select: { id: true, email: true },
+      });
+
+      if (!existingUser) {
+        console.warn("Password reset for missing app user:", normalizedEmail);
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              "We couldn't find your account in our database. Please contact support.",
+          },
+          { status: 404 },
+        );
+      }
+
+      // Update password hash in our database
+      const hashedPassword = await hashPassword(newPassword);
       const user = await prisma.user.update({
-        where: { email: email.toLowerCase().trim() },
+        where: { id: existingUser.id },
         data: {
           password: hashedPassword,
           isPasswordChanged: true,
